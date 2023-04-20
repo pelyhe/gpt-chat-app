@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:project/pages/auth/login_screen.dart';
+import 'package:project/pages/auth/sign_up_screen.dart';
 import 'package:project/pages/chat/chat.dart';
 import 'package:project/pages/home.dart';
 
@@ -16,9 +18,13 @@ class AppRoutes {
 //    - get the parameter by Get.parameters[MyPageScreen.idParameter]
   static String home = "/";
   static String chat = "/chat";
+  static String login = '/login';
+  static String signUp = '/register';
 
   static final pages = [
     GetPage(name: home, page: () => const HomePage()),
-    GetPage(name: chat, page: () => const ChatPage())
+    GetPage(name: chat, page: () => const ChatPage()),
+    GetPage(name: login, page: () => const LoginScreen()),
+    GetPage(name: signUp, page: () => const SignUpScreen()),
   ];
 }

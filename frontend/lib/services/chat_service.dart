@@ -4,9 +4,9 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatService {
-  Future<String?> askChatbot(String prompt) async {
+  Future<String?> askChatbot(String prompt, String id) async {
     final response = await http.get(
-        Uri.parse('${dotenv.env['CHAT_API_URL']}/ask?query="$prompt&id=user1"'),
+        Uri.parse('${dotenv.env['CHAT_API_URL']}/ask?prompt=$prompt&id=$id'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         });
