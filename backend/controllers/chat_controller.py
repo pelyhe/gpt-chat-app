@@ -1,3 +1,7 @@
+import logging
+LOG_FILE_PATH = 'config/requests.log'
+logging.basicConfig(filename=LOG_FILE_PATH, filemode='a', level=logging.CRITICAL,
+                    format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
 import datetime
 import os
 import pickle
@@ -13,8 +17,10 @@ from config.db import get_db
 
 os.environ['OPENAI_API_KEY'] = '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'
 DOCUMENTS_DIRECTORY = 'data'
+
 db = get_db()
 userModel = db['users']
+
 
 class ChatController(BaseModel):
 
@@ -40,7 +46,8 @@ class ChatController(BaseModel):
             # curr_index.save_to_disk(f'index_{filename}.json')
 
         llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, max_tokens=512))
-        service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor)
+        service_context = ServiceContext.from_defaults(
+            llm_predictor=llm_predictor)
 
         # define a list index over the vector indices
         # allows us to synthesize information across each index
@@ -111,7 +118,7 @@ class ChatController(BaseModel):
             memory=memory,
             verbose=True
         )
-    
+
     def update_previous_messages(userId: str, prompt: str, response: str):
         new_message = {
             "user": prompt,
@@ -119,7 +126,14 @@ class ChatController(BaseModel):
             "timestamp": datetime.datetime.now()
         }
 
-        userModel.update_one({"_id": ObjectId(userId)}, {"$push": {"previousMessages": new_message}})
+        userModel.update_one({"_id": ObjectId(userId)}, {
+                             "$push": {"previousMessages": new_message}})
+
+    def log_to_file(prompt, responseTime, succeed, errorMessage=None):
+        if succeed:
+            logging.critical('RESPONSE TIME: '+ responseTime +'. Question: '+ prompt)
+        else:
+            logging.critical('ERROR: ' + errorMessage)
 
     @classmethod
     def askAI(cls, prompt: str, id: str):
@@ -133,15 +147,21 @@ class ChatController(BaseModel):
             mem = pickle.load(handle)
         agent_executor = cls.create_chat_agent(mem)
 
+        beforeResponseTimestamp = datetime.datetime.now()
         # for could not parse LLM output
         try:
             response = agent_executor.run(input=prompt)
         except ValueError as e:
             response = str(e)
             if not response.startswith("Could not parse LLM output: `"):
+                cls.log_to_file(prompt, responseTime, succeed=False, errorMessage=str(e))
                 raise e
             response = response.removeprefix(
                 "Could not parse LLM output: `").removesuffix("`")
+
+        afterResponseTimestamp = datetime.datetime.now()
+        responseTime = afterResponseTimestamp-beforeResponseTimestamp
+        cls.log_to_file(prompt, str(responseTime), succeed=True)
 
         # save memory after response
         with open('conv_memory/' + id + '.pickle', 'wb') as handle:
