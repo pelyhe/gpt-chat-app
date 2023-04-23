@@ -1,43 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project/components/background.dart';
-import 'package:project/components/home/user_card.dart';
-import 'package:project/entities/user.dart';
 import 'package:project/general/fonts.dart';
 import 'package:project/general/themes.dart';
 import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
-import 'package:project/services/user_service.dart';
-import 'package:project/pages/preference/location.dart';
-import '../components/home/preference_btn.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+import 'favourite_artist.dart';
+
+
+class FavouriteGalleriesPage extends StatefulWidget {
+  const FavouriteGalleriesPage({Key? key}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<FavouriteGalleriesPage> createState() => _FavouriteGalleriesPageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  final controller = HomeController();
-  Future? loadUsers;
+class _FavouriteGalleriesPageState extends State<FavouriteGalleriesPage> {
+  final controller = FavouriteGalleriesController();
+  Future? load;
 
   @override
   void initState() {
     super.initState();
-    loadUsers = controller.loadUsers();
+    load = controller.load();
   }
 
   @override
   Widget build(BuildContext context) {
     ScreenSize.refresh(context);
     return FutureBuilder(
-        future: loadUsers,
+        future: load,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const LoadingPage();
           } else {
-            return GetBuilder<HomeController>(
+            return GetBuilder<FavouriteGalleriesController>(
                 init: controller,
                 builder: (controller) {
                   return Scaffold(
@@ -60,24 +58,8 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text("Select user", style: AppFonts.headerFont),
-              Row(
-                children: [
-                  const SizedBox(width: 50),
-                  for (var u in controller.users!)
-                    Expanded(child: UserCard(user: u)),
-                  const SizedBox(width: 50),
-                ],
-              ),
-              Row(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: ScreenSize.isMobile ? 5 : 300, vertical: 5),
-                    child: Expanded(child: PreferenceBtn()),
-                  ),
-                ],
-              ),
+              Text("Choose the artwork You like most",
+                  style: AppFonts.headerFont),
             ],
           ),
         ),
@@ -92,21 +74,28 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text("Select user", style: AppFonts.headerFont),
-              Row(
-                children: [
-                  const SizedBox(width: 50),
-                  for (var u in controller.users!)
-                    Expanded(child: UserCard(user: u)),
-                  const SizedBox(width: 50),
-                ],
-              ),
+              Text("Choose the Gallery You like the most!",
+                  style: AppFonts.headerFont),
               Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
                 child: Row(
                   children: [
-                    Expanded(child: PreferenceBtn()),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          //Save answer to db
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const FavouriteArtistPage()),
+                          );
+                        },
+                        child: Text(
+                          "Next".toUpperCase(),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -118,12 +107,8 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class HomeController extends GetxController {
-  List<User>? users = [];
-  final userService = UserService();
-
-  loadUsers() async {
-    users = await userService.getUsers();
+class FavouriteGalleriesController extends GetxController {
+  load() async {
     update();
   }
 }
