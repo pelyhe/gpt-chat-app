@@ -5,6 +5,7 @@ import 'package:project/general/fonts.dart';
 import 'package:project/general/themes.dart';
 import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
+import 'job_action_fairs.dart';
 
 
 class BoughtArtworksPage extends StatefulWidget {
@@ -72,7 +73,7 @@ class _BoughtArtworksPageState extends State<BoughtArtworksPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text("If you have purchased art before, What kind did you buy?",
+              Text("SKIP THIS",
                   style: AppFonts.headerFont),
               Padding(
                 padding: EdgeInsets.symmetric(
@@ -86,7 +87,7 @@ class _BoughtArtworksPageState extends State<BoughtArtworksPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const BoughtArtworksPage()),
+                                builder: (context) => const JobAuctionFairPage()),
                           );
                         },
                         child: Text(

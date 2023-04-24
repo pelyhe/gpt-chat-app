@@ -7,6 +7,7 @@ import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
 
 import 'bought_artworks.dart';
+import 'general_card.dart';
 
 
 class FavouriteArtistPage extends StatefulWidget {
@@ -74,9 +75,19 @@ class _FavouriteArtistPageState extends State<FavouriteArtistPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text("Choose the Gallery You like the most!",
+              Text("Choose the Artist You like the most!",
                   style: AppFonts.headerFont),
               Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
+                child: Row(
+                  children: [
+                    artistCard(name: 'Artist1'),
+                    artistCard(name: 'Artist2'),
+                    artistCard(name: 'Artist3'),
+                  ],
+                ),
+              ),Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
                 child: Row(
@@ -105,6 +116,14 @@ class _FavouriteArtistPageState extends State<FavouriteArtistPage> {
       ),
     );
   }
+}
+
+Expanded artistCard({required String name}) {
+  return Expanded(
+    child: GeneralCard(
+      name: name,
+    ),
+  );
 }
 
 class FavouriteArtistController extends GetxController {

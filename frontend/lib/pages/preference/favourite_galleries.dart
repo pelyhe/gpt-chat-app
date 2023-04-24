@@ -7,6 +7,7 @@ import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
 
 import 'favourite_artist.dart';
+import 'general_card.dart';
 
 
 class FavouriteGalleriesPage extends StatefulWidget {
@@ -81,14 +82,25 @@ class _FavouriteGalleriesPageState extends State<FavouriteGalleriesPage> {
                     horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
                 child: Row(
                   children: [
+                    galleryCard(name: 'Gallery1'),
+                    galleryCard(name: 'Gallery2'),
+                    galleryCard(name: 'Gallery3'),
+                  ],
+                ),
+              ),Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
+                child: Row(
+                  children: [
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          //Save answer to db
+                          //TODO Save answer to db
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const FavouriteArtistPage()),
+                                builder: (context) =>
+                                    const FavouriteArtistPage()),
                           );
                         },
                         child: Text(
@@ -105,6 +117,14 @@ class _FavouriteGalleriesPageState extends State<FavouriteGalleriesPage> {
       ),
     );
   }
+}
+
+Expanded galleryCard({required String name}) {
+  return Expanded(
+    child: GeneralCard(
+      name: name,
+    ),
+  );
 }
 
 class FavouriteGalleriesController extends GetxController {

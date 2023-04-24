@@ -5,9 +5,9 @@ import 'package:project/general/fonts.dart';
 import 'package:project/general/themes.dart';
 import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
+import 'package:project/pages/preference/general_card.dart';
 
 import 'favourite_galleries.dart';
-
 
 class FavouriteArtWorksPage extends StatefulWidget {
   const FavouriteArtWorksPage({Key? key}) : super(key: key);
@@ -81,14 +81,26 @@ class _FavouriteArtWorksPageState extends State<FavouriteArtWorksPage> {
                     horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
                 child: Row(
                   children: [
+                    artworkCard(name: 'Artwork1'),
+                    artworkCard(name: 'Artwork2'),
+                    artworkCard(name: 'Artwork3'),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
+                child: Row(
+                  children: [
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          //Save answer to db
+                          //TODO Save answer to db
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const FavouriteGalleriesPage()),
+                                builder: (context) =>
+                                    const FavouriteGalleriesPage()),
                           );
                         },
                         child: Text(
@@ -105,6 +117,14 @@ class _FavouriteArtWorksPageState extends State<FavouriteArtWorksPage> {
       ),
     );
   }
+}
+
+Expanded artworkCard({required String name}) {
+  return Expanded(
+    child: GeneralCard(
+      name: name,
+    ),
+  );
 }
 
 class FavouriteArtWorksController extends GetxController {
