@@ -45,7 +45,7 @@ class ChatController(BaseModel):
             index_set[filename] = curr_index
             # curr_index.save_to_disk(f'index_{filename}.json')
 
-        llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, max_tokens=512))
+        llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-3.5-turbo", max_tokens=512))
         service_context = ServiceContext.from_defaults(
             llm_predictor=llm_predictor)
 
@@ -110,7 +110,7 @@ class ChatController(BaseModel):
             graph_configs=[graph_config]
         )
 
-        llm = OpenAI(temperature=0)
+        llm = OpenAI(temperature=0, model_name="gpt-3.5-turbo")
 
         return create_llama_chat_agent(
             toolkit,

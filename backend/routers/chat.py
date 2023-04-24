@@ -11,3 +11,4 @@ router = APIRouter()
 @router.get("/ask",  tags=["user", "chat"])
 def ask(prompt: str, id: str):
     return ChatController.askAI(prompt=prompt, id=id)
+
