@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project/components/background.dart';
@@ -7,15 +9,15 @@ import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
 
 //TODO Merge Job and Auction and Fairs
-class JobPage extends StatefulWidget {
-  const JobPage({Key? key}) : super(key: key);
+class JobAuctionFairPage extends StatefulWidget {
+  const JobAuctionFairPage({Key? key}) : super(key: key);
 
   @override
-  State<JobPage> createState() => _JobPageState();
+  State<JobAuctionFairPage> createState() => _JobAuctionFairPageState();
 }
 
-class _JobPageState extends State<JobPage> {
-  final controller = JobController();
+class _JobAuctionFairPageState extends State<JobAuctionFairPage> {
+  final controller = JobAuctionFairController();
   Future? load;
 
   @override
@@ -33,7 +35,7 @@ class _JobPageState extends State<JobPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const LoadingPage();
           } else {
-            return GetBuilder<JobController>(
+            return GetBuilder<JobAuctionFairController>(
                 init: controller,
                 builder: (controller) {
                   return Scaffold(
@@ -72,31 +74,27 @@ class _JobPageState extends State<JobPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text("If you have purchased art before, What kind did you buy?",
-                  style: AppFonts.headerFont),
               Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          //Save answer to db
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const JobPage()),
-                          );
-                        },
-                        child: Text(
-                          "Next".toUpperCase(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                child: Text("What is Your profession?",
+                    style: AppFonts.headerFont),
               ),
+              professionGroup(),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
+                child: Text("Do you go to Art Auctions?",
+                    style: AppFonts.headerFont),
+              ),
+              yesNoChoiseGroup(),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
+                child:
+                    Text("Do you go to Art Fairs?", style: AppFonts.headerFont),
+              ),
+              yesNoChoiseGroup(),
             ],
           ),
         ),
@@ -105,7 +103,91 @@ class _JobPageState extends State<JobPage> {
   }
 }
 
-class JobController extends GetxController {
+Padding professionGroup() {
+  String? answer;
+  return Padding(
+    padding: EdgeInsets.symmetric(
+        horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
+    child: Row(
+      children: [
+        Expanded(
+          child: RadioListTile(
+            title: const Text("Collector"),
+            value: "Collector",
+            groupValue: answer,
+            onChanged: (value) {
+              answer = value.toString();
+            },
+          ),
+        ),
+        Expanded(
+          child: RadioListTile(
+            title: const Text("Journalist"),
+            value: "Journalist",
+            groupValue: answer,
+            onChanged: (value) {
+              answer = value.toString();
+            },
+          ),
+        ),
+        Expanded(
+          child: RadioListTile(
+            title: const Text("Curator"),
+            value: "Curator",
+            groupValue: answer,
+            onChanged: (value) {
+              answer = value.toString();
+            },
+          ),
+        ),
+        Expanded(
+          child: RadioListTile(
+            title: const Text("User"),
+            value: "User",
+            groupValue: answer,
+            onChanged: (value) {
+              answer = value.toString();
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Padding yesNoChoiseGroup() {
+  String? answer;
+  return Padding(
+    padding: EdgeInsets.symmetric(
+        horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
+    child: Row(
+      children: [
+        Expanded(
+          child: RadioListTile(
+            title: const Text("Yes"),
+            value: "Yes",
+            groupValue: answer,
+            onChanged: (value) {
+              answer = value.toString();
+            },
+          ),
+        ),
+        Expanded(
+          child: RadioListTile(
+            title: const Text("No"),
+            value: "No",
+            groupValue: answer,
+            onChanged: (value) {
+              answer = value.toString();
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class JobAuctionFairController extends GetxController {
   load() async {
     update();
   }
