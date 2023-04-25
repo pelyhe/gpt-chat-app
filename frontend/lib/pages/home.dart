@@ -8,8 +8,6 @@ import 'package:project/general/themes.dart';
 import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
 import 'package:project/services/user_service.dart';
-import 'package:project/pages/preference/location.dart';
-import '../components/home/preference_btn.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -69,15 +67,6 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(width: 50),
                 ],
               ),
-              Row(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: ScreenSize.isMobile ? 5 : 300, vertical: 5),
-                    child: Expanded(child: PreferenceBtn()),
-                  ),
-                ],
-              ),
             ],
           ),
         ),
@@ -101,15 +90,12 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(width: 50),
                 ],
               ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
-                child: Row(
-                  children: [
-                    Expanded(child: PreferenceBtn()),
-                  ],
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/location');
+                  },
+                  child: Text("Take Preference Quiz".toUpperCase()),
                 ),
-              ),
             ],
           ),
         ),

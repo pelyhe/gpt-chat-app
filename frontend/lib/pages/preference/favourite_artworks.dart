@@ -7,6 +7,7 @@ import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
 import 'package:project/pages/preference/general_card.dart';
 
+import '../../entities/user.dart';
 import 'favourite_galleries.dart';
 
 class FavouriteArtWorksPage extends StatefulWidget {
@@ -95,13 +96,7 @@ class _FavouriteArtWorksPageState extends State<FavouriteArtWorksPage> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          //TODO Save answer to db
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const FavouriteGalleriesPage()),
-                          );
+                          Navigator.pushNamed(context, '/favouriteGallery');
                         },
                         child: Text(
                           "Next".toUpperCase(),
@@ -123,6 +118,7 @@ Expanded artworkCard({required String name}) {
   return Expanded(
     child: GeneralCard(
       name: name,
+      callback: () {},
     ),
   );
 }

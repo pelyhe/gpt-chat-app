@@ -9,7 +9,6 @@ import 'package:project/pages/loading.dart';
 import 'favourite_artist.dart';
 import 'general_card.dart';
 
-
 class FavouriteGalleriesPage extends StatefulWidget {
   const FavouriteGalleriesPage({Key? key}) : super(key: key);
 
@@ -87,7 +86,8 @@ class _FavouriteGalleriesPageState extends State<FavouriteGalleriesPage> {
                     galleryCard(name: 'Gallery3'),
                   ],
                 ),
-              ),Padding(
+              ),
+              Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
                 child: Row(
@@ -95,13 +95,7 @@ class _FavouriteGalleriesPageState extends State<FavouriteGalleriesPage> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          //TODO Save answer to db
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const FavouriteArtistPage()),
-                          );
+                          Navigator.pushNamed(context, '/favouriteArtist');
                         },
                         child: Text(
                           "Next".toUpperCase(),
@@ -123,6 +117,7 @@ Expanded galleryCard({required String name}) {
   return Expanded(
     child: GeneralCard(
       name: name,
+      callback: () {},
     ),
   );
 }

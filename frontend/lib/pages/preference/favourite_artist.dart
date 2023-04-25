@@ -6,9 +6,8 @@ import 'package:project/general/themes.dart';
 import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
 
-import 'bought_artworks.dart';
+import 'purchased_artworks.dart';
 import 'general_card.dart';
-
 
 class FavouriteArtistPage extends StatefulWidget {
   const FavouriteArtistPage({Key? key}) : super(key: key);
@@ -87,7 +86,8 @@ class _FavouriteArtistPageState extends State<FavouriteArtistPage> {
                     artistCard(name: 'Artist3'),
                   ],
                 ),
-              ),Padding(
+              ),
+              Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
                 child: Row(
@@ -95,12 +95,7 @@ class _FavouriteArtistPageState extends State<FavouriteArtistPage> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          //Save answer to db
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const BoughtArtworksPage()),
-                          );
+                          Navigator.pushNamed(context, '/purchasedArtwork');
                         },
                         child: Text(
                           "Next".toUpperCase(),
@@ -122,6 +117,7 @@ Expanded artistCard({required String name}) {
   return Expanded(
     child: GeneralCard(
       name: name,
+      callback: () {},
     ),
   );
 }

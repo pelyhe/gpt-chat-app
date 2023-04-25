@@ -5,7 +5,12 @@ import 'package:project/general/fonts.dart';
 import 'package:project/general/themes.dart';
 import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
+import '../../entities/user.dart';
+import 'favourite_artist.dart';
 import 'favourite_artworks.dart';
+import 'favourite_galleries.dart';
+import 'general_card.dart';
+import 'job_action_fairs.dart';
 
 class LocationPage extends StatefulWidget {
   const LocationPage({Key? key}) : super(key: key);
@@ -16,6 +21,8 @@ class LocationPage extends StatefulWidget {
 
 class _LocationPageState extends State<LocationPage> {
   final controller = LocationController();
+  TextEditingController countryField = TextEditingController();
+  TextEditingController cityField = TextEditingController();
   Future? load;
 
   @override
@@ -66,12 +73,6 @@ class _LocationPageState extends State<LocationPage> {
                     child: ElevatedButton(
                       onPressed: () {
                         //Save answer to db
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const FavouriteArtWorksPage()),
-                        );
                       },
                       child: Text(
                         "Yes".toUpperCase(),
@@ -83,12 +84,6 @@ class _LocationPageState extends State<LocationPage> {
                     child: ElevatedButton(
                       onPressed: () {
                         //Save answer to db
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const FavouriteArtWorksPage()),
-                        );
                       },
                       child: Text(
                         "No".toUpperCase(),
@@ -120,18 +115,108 @@ class _LocationPageState extends State<LocationPage> {
               child: Row(
                 children: [
                   //TODO save these to DB
-                  inputField(hint: 'Country'),
-                  inputField(hint: 'City'),
+                  Expanded(
+                    child: TextField(
+                      controller: countryField,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Country',
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: cityField,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'City',
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
+            Text("Choose the artwork You prefer the most!",
+                style: AppFonts.headerFont),
             Padding(
               padding: EdgeInsets.symmetric(
-                  horizontal: ScreenSize.isMobile ? 5 : 300, vertical: 10),
+                  horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
               child: Row(
                 children: [
-                  nextButton(context: context),
+                  GeneralCard(
+                    name: 'Artwork1',
+                    callback: setFavArtwork,
+                  ),
+                  GeneralCard(
+                    name: 'Artwork2',
+                    callback: setFavArtwork,
+                  ),
+                  GeneralCard(
+                    name: 'Artwork2',
+                    callback: setFavArtwork,
+                  ),
                 ],
+              ),
+            ),
+            Text("Choose the Gallery You prefer the most!",
+                style: AppFonts.headerFont),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
+              child: Row(
+                children: [
+                  GeneralCard(
+                    name: 'Gallery1',
+                    callback: setFavGallery,
+                  ),
+                  GeneralCard(
+                    name: 'Gallery2',
+                    callback: setFavGallery,
+                  ),
+                  GeneralCard(
+                    name: 'Gallery3',
+                    callback: setFavGallery,
+                  ),
+                ],
+              ),
+            ),
+            Text("Choose the Artist You prefer the most!",
+                style: AppFonts.headerFont),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
+              child: Row(
+                children: [
+                  GeneralCard(
+                    name: 'Artist1',
+                    callback: setFavArtist,
+                  ),
+                  GeneralCard(
+                    name: 'Artist2',
+                    callback: setFavArtist,
+                  ),
+                  GeneralCard(
+                    name: 'Artist3',
+                    callback: setFavArtist,
+                  ),
+                ],
+              ),
+            ),
+            Text("SKIP THIS: Purchased Artworks", style: AppFonts.headerFont),
+            Text("What is Your profession?", style: AppFonts.headerFont),
+            professionGroup(),
+            Text("Do you go to Art Auctions?", style: AppFonts.headerFont),
+            yesNoChoiseGroup(),
+            Text("Do you go to Art Fairs?", style: AppFonts.headerFont),
+            yesNoChoiseGroup(),
+            ElevatedButton(
+              onPressed: () {
+                controller.bela.city = cityField.text;
+                controller.bela.country = countryField.text;
+                //Navigator.pushNamed(context, '/purchasedArtwork');
+              },
+              child: Text(
+                "Save Preferences".toUpperCase(),
               ),
             ),
           ],
@@ -140,36 +225,28 @@ class _LocationPageState extends State<LocationPage> {
     );
   }
 
-  Expanded inputField({required String hint}) {
-    return Expanded(
-      child: TextField(
-        decoration: InputDecoration(
-          border: OutlineInputBorder(),
-          hintText: hint,
-        ),
-      ),
-    );
+  void setFavArtwork(String s) {
+    controller.bela.favArtwork = s;
+    print(controller.bela.favArtwork);
+  }
+
+  void setFavGallery(String s) {
+    controller.bela.favGallery = s;
+    print(controller.bela.favGallery);
+  }
+
+  void setFavArtist(String s) {
+    controller.bela.favArtist = s;
+    print(controller.bela.favArtist);
   }
 }
 
-Expanded nextButton({required BuildContext context}) {
-  return Expanded(
-    child: ElevatedButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const FavouriteArtWorksPage()),
-        );
-      },
-      child: Text(
-        "Next".toUpperCase(),
-      ),
-    ),
-  );
-}
+//GeneralCard Here
+
+//RadioButton Here
 
 class LocationController extends GetxController {
+  User bela = User(id: '0', username: 'Béla');
   load() async {
     update();
   }

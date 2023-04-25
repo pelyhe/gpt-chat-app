@@ -7,12 +7,13 @@ import 'package:project/general/utils.dart';
 class GeneralCard extends StatefulWidget {
   bool isHovering = false;
   String name;
+  Function callback;
 
   final hoveredTransform = Matrix4.identity()
     ..translate(-7, 4)
     ..scale(1.02);
 
-  GeneralCard({Key? key, required this.name}) : super(key: key);
+  GeneralCard({Key? key, required this.name, required this.callback}) : super(key: key);
 
   @override
   State<GeneralCard> createState() => _GeneralCardState();
@@ -27,6 +28,8 @@ class _GeneralCardState extends State<GeneralCard> {
 
     return InkWell(
       onTap: () {
+        widget.callback(widget.name);
+        //TODO color change
         //Navigator.pushNamed(context, '/chat?id=${widget.user.id}');
       }, 
       onHover: (isHovering) {

@@ -7,16 +7,15 @@ import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
 import 'job_action_fairs.dart';
 
-
-class BoughtArtworksPage extends StatefulWidget {
-  const BoughtArtworksPage({Key? key}) : super(key: key);
+class PurchasedArtworksPage extends StatefulWidget {
+  const PurchasedArtworksPage({Key? key}) : super(key: key);
 
   @override
-  State<BoughtArtworksPage> createState() => _BoughtArtworksPageState();
+  State<PurchasedArtworksPage> createState() => _PurchasedArtworksPageState();
 }
 
-class _BoughtArtworksPageState extends State<BoughtArtworksPage> {
-  final controller = BoughtArtworksController();
+class _PurchasedArtworksPageState extends State<PurchasedArtworksPage> {
+  final controller = PurchasedArtworksController();
   Future? load;
 
   @override
@@ -34,7 +33,7 @@ class _BoughtArtworksPageState extends State<BoughtArtworksPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const LoadingPage();
           } else {
-            return GetBuilder<BoughtArtworksController>(
+            return GetBuilder<PurchasedArtworksController>(
                 init: controller,
                 builder: (controller) {
                   return Scaffold(
@@ -73,8 +72,7 @@ class _BoughtArtworksPageState extends State<BoughtArtworksPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text("SKIP THIS",
-                  style: AppFonts.headerFont),
+              Text("SKIP THIS", style: AppFonts.headerFont),
               Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
@@ -83,12 +81,7 @@ class _BoughtArtworksPageState extends State<BoughtArtworksPage> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          //Save answer to db
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const JobAuctionFairPage()),
-                          );
+                          Navigator.pushNamed(context, '/jobAuctionFair');
                         },
                         child: Text(
                           "Next".toUpperCase(),
@@ -106,7 +99,7 @@ class _BoughtArtworksPageState extends State<BoughtArtworksPage> {
   }
 }
 
-class BoughtArtworksController extends GetxController {
+class PurchasedArtworksController extends GetxController {
   load() async {
     update();
   }
