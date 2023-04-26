@@ -29,7 +29,7 @@ class _UserCardState extends State<UserCard> {
     return InkWell(
       onTap: () {
         Navigator.pushNamed(context, '/chat?id=${widget.user.id}');
-      }, 
+      },
       onHover: (isHovering) {
         if (isHovering) {
           if (mounted) {
@@ -69,13 +69,10 @@ class _UserCardState extends State<UserCard> {
                             : 30,
                     backgroundColor: AppColors.kPrimaryColor,
                     child: ScreenSize.isDesktop
-                            ? createAvatarFromName(
-                                80, widget.user.username, 0)
-                            : ScreenSize.isTablet
-                                ? createAvatarFromName(
-                                    60, widget.user.username, 0)
-                                : createAvatarFromName(
-                                    40, widget.user.username, 0),
+                        ? createAvatarFromName(80, widget.user.username, 0)
+                        : ScreenSize.isTablet
+                            ? createAvatarFromName(60, widget.user.username, 0)
+                            : createAvatarFromName(40, widget.user.username, 0),
                   ),
                 ),
                 Padding(
@@ -89,7 +86,13 @@ class _UserCardState extends State<UserCard> {
                         fontSize: ScreenSize.isMobile ? 15 : 30,
                       ),
                       maxLines: 2),
-                )
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/location');
+                  },
+                  child: Text("Take Preference Quiz".toUpperCase()),
+                ),
               ],
             ),
           ),

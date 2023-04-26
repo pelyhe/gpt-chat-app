@@ -90,12 +90,6 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(width: 50),
                 ],
               ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/location');
-                  },
-                  child: Text("Take Preference Quiz".toUpperCase()),
-                ),
             ],
           ),
         ),

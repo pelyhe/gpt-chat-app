@@ -145,15 +145,15 @@ class _LocationPageState extends State<LocationPage> {
                 children: [
                   GeneralCard(
                     name: 'Artwork1',
-                    callback: setFavArtwork,
+                    callback: controller.setFavArtwork,
                   ),
                   GeneralCard(
                     name: 'Artwork2',
-                    callback: setFavArtwork,
+                    callback: controller.setFavArtwork,
                   ),
                   GeneralCard(
                     name: 'Artwork2',
-                    callback: setFavArtwork,
+                    callback: controller.setFavArtwork,
                   ),
                 ],
               ),
@@ -167,15 +167,15 @@ class _LocationPageState extends State<LocationPage> {
                 children: [
                   GeneralCard(
                     name: 'Gallery1',
-                    callback: setFavGallery,
+                    callback: controller.setFavGallery,
                   ),
                   GeneralCard(
                     name: 'Gallery2',
-                    callback: setFavGallery,
+                    callback: controller.setFavGallery,
                   ),
                   GeneralCard(
                     name: 'Gallery3',
-                    callback: setFavGallery,
+                    callback: controller.setFavGallery,
                   ),
                 ],
               ),
@@ -189,30 +189,125 @@ class _LocationPageState extends State<LocationPage> {
                 children: [
                   GeneralCard(
                     name: 'Artist1',
-                    callback: setFavArtist,
+                    callback: controller.setFavArtist,
                   ),
                   GeneralCard(
                     name: 'Artist2',
-                    callback: setFavArtist,
+                    callback: controller.setFavArtist,
                   ),
                   GeneralCard(
                     name: 'Artist3',
-                    callback: setFavArtist,
+                    callback: controller.setFavArtist,
                   ),
                 ],
               ),
             ),
-            Text("SKIP THIS: Purchased Artworks", style: AppFonts.headerFont),
+            //Text("SKIP THIS: Purchased Artworks", style: AppFonts.headerFont),
             Text("What is Your profession?", style: AppFonts.headerFont),
-            professionGroup(),
+            RadioListTile<String?>(
+              title: const Text("Collector"),
+              value: "Collector",
+              groupValue: controller.jobGroupVal,
+              onChanged: (value) {
+                setState(() {
+                  controller.setJob(value);
+                  controller.jobGroupVal = value;
+                });
+              },
+            ),
+            RadioListTile<String?>(
+              title: const Text("Journalist"),
+              value: "Journalist",
+              groupValue: controller.jobGroupVal,
+              onChanged: (value) {
+                setState(() {
+                  controller.setJob(value);
+                  controller.jobGroupVal = value;
+                });
+              },
+            ),
+            RadioListTile<String?>(
+              title: const Text("Curator"),
+              value: "Curator",
+              groupValue: controller.jobGroupVal,
+              onChanged: (value) {
+                setState(() {
+                  controller.setJob(value);
+                  controller.jobGroupVal = value;
+                });
+              },
+            ),
+            RadioListTile<String?>(
+              title: const Text("Other"),
+              value: "Other",
+              groupValue: controller.jobGroupVal,
+              onChanged: (value) {
+                setState(() {
+                  controller.setJob(value);
+                  controller.jobGroupVal = value;
+                });
+              },
+            ),
             Text("Do you go to Art Auctions?", style: AppFonts.headerFont),
-            yesNoChoiseGroup(),
+            RadioListTile<String?>(
+              title: const Text("Yes"),
+              value: "Yes",
+              groupValue: controller.auctionGroupVal,
+              onChanged: (value) {
+                setState(() {
+                  if (value == "Yes") {
+                    controller.setAuction(true);
+                  }
+                  controller.auctionGroupVal = value;
+                });
+              },
+            ),
+            RadioListTile<String?>(
+              title: const Text("No"),
+              value: "No",
+              groupValue: controller.auctionGroupVal,
+              onChanged: (value) {
+                setState(() {
+                  if (value == "No") {
+                    controller.setAuction(false);
+                  }
+                  controller.auctionGroupVal = value;
+                });
+              },
+            ),
             Text("Do you go to Art Fairs?", style: AppFonts.headerFont),
-            yesNoChoiseGroup(),
+            RadioListTile<String?>(
+              title: const Text("Yes"),
+              value: "Yes",
+              groupValue: controller.fairGroupVal,
+              onChanged: (value) {
+                setState(() {
+                  if (value == "Yes") {
+                    controller.setFairs(true);
+                  }
+                  controller.fairGroupVal = value;
+                });
+              },
+            ),
+            RadioListTile<String?>(
+              title: const Text("No"),
+              value: "No",
+              groupValue: controller.fairGroupVal,
+              onChanged: (value) {
+                setState(() {
+                  if (value == "No") {
+                    controller.setFairs(false);
+                  }
+                  controller.fairGroupVal = value;
+                });
+              },
+            ),
             ElevatedButton(
               onPressed: () {
                 controller.bela.city = cityField.text;
                 controller.bela.country = countryField.text;
+                print("Saving changes");
+                print(controller.bela);
                 //Navigator.pushNamed(context, '/purchasedArtwork');
               },
               child: Text(
@@ -224,29 +319,44 @@ class _LocationPageState extends State<LocationPage> {
       )),
     );
   }
-
-  void setFavArtwork(String s) {
-    controller.bela.favArtwork = s;
-    print(controller.bela.favArtwork);
-  }
-
-  void setFavGallery(String s) {
-    controller.bela.favGallery = s;
-    print(controller.bela.favGallery);
-  }
-
-  void setFavArtist(String s) {
-    controller.bela.favArtist = s;
-    print(controller.bela.favArtist);
-  }
 }
-
-//GeneralCard Here
-
-//RadioButton Here
 
 class LocationController extends GetxController {
   User bela = User(id: '0', username: 'Béla');
+  String? jobGroupVal = "Other";
+  String? auctionGroupVal = "No";
+  String? fairGroupVal = "No";
+
+  void setFavArtwork(String? s) {
+    bela.favArtwork = s;
+    print(bela.favArtwork);
+  }
+
+  void setFavGallery(String? s) {
+    bela.favGallery = s;
+    print(bela.favGallery);
+  }
+
+  void setFavArtist(String? s) {
+    bela.favArtist = s;
+    print(bela.favArtist);
+  }
+
+  void setJob(String? s) {
+    bela.job = s;
+    print(bela.job);
+  }
+
+  void setAuction(bool b) {
+    bela.auctions = b;
+    print("Auctions: " + bela.auctions.toString());
+  }
+
+  void setFairs(bool b) {
+    bela.fairs = b;
+    print("Fairs: " + bela.fairs.toString());
+  }
+
   load() async {
     update();
   }

@@ -6,6 +6,9 @@ class User {
   String? favArtwork;
   String? favGallery;
   String? favArtist;
+  String? job;
+  bool? auctions;
+  bool? fairs;
   
   User({
     required this.username,
