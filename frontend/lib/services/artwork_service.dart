@@ -7,7 +7,6 @@ class ArtworkService {
   Future<List<Artwork>?> getArtworks() async {
     try {
       final response = await http.get(
-          //TODO make /artwork endpoint
           Uri.parse('${dotenv.env['CHAT_API_URL']}/artwork'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
@@ -21,7 +20,7 @@ class ArtworkService {
         for (var i = 0; i < jsonData.length; i++) {
           artwork = Artwork(
             id: jsonData[i]['_id'],
-            title: jsonData[i]['username'],
+            title: jsonData[i]['title'],
             desc: jsonData[i]['description'],
             height: jsonData[i]['height'],
             technique: jsonData[i]['technique'],

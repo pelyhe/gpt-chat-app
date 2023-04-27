@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
                     body: scaffoldBody(
                       context: context,
                       //mobileBody: _mobileBody(),
-                      tabletBody: _mobileBody(),
+                      //tabletBody: _mobileBody(),
                       desktopBody: _desktopBody(),
                     ),
                   );
@@ -103,7 +103,7 @@ class HomeController extends GetxController {
   final userService = UserService();
 
   loadUsers() async {
-    users = await userService.getUsers();
+    users = await userService.getUsers();            
     update();
   }
 }

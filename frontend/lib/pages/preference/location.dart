@@ -5,6 +5,8 @@ import 'package:project/general/fonts.dart';
 import 'package:project/general/themes.dart';
 import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
+import 'package:project/services/artwork_service.dart';
+import '../../entities/artwork.dart';
 import '../../entities/user.dart';
 import 'favourite_artist.dart';
 import 'favourite_artworks.dart';
@@ -203,104 +205,199 @@ class _LocationPageState extends State<LocationPage> {
               ),
             ),
             //Text("SKIP THIS: Purchased Artworks", style: AppFonts.headerFont),
-            Text("What is Your profession?", style: AppFonts.headerFont),
-            RadioListTile<String?>(
-              title: const Text("Collector"),
-              value: "Collector",
-              groupValue: controller.jobGroupVal,
-              onChanged: (value) {
-                setState(() {
-                  controller.setJob(value);
-                  controller.jobGroupVal = value;
-                });
-              },
-            ),
-            RadioListTile<String?>(
-              title: const Text("Journalist"),
-              value: "Journalist",
-              groupValue: controller.jobGroupVal,
-              onChanged: (value) {
-                setState(() {
-                  controller.setJob(value);
-                  controller.jobGroupVal = value;
-                });
-              },
-            ),
-            RadioListTile<String?>(
-              title: const Text("Curator"),
-              value: "Curator",
-              groupValue: controller.jobGroupVal,
-              onChanged: (value) {
-                setState(() {
-                  controller.setJob(value);
-                  controller.jobGroupVal = value;
-                });
-              },
-            ),
-            RadioListTile<String?>(
-              title: const Text("Other"),
-              value: "Other",
-              groupValue: controller.jobGroupVal,
-              onChanged: (value) {
-                setState(() {
-                  controller.setJob(value);
-                  controller.jobGroupVal = value;
-                });
-              },
-            ),
-            Text("Do you go to Art Auctions?", style: AppFonts.headerFont),
-            RadioListTile<String?>(
-              title: const Text("Yes"),
-              value: "Yes",
-              groupValue: controller.auctionGroupVal,
-              onChanged: (value) {
-                setState(() {
-                  if (value == "Yes") {
-                    controller.setAuction(true);
-                  }
-                  controller.auctionGroupVal = value;
-                });
-              },
-            ),
-            RadioListTile<String?>(
-              title: const Text("No"),
-              value: "No",
-              groupValue: controller.auctionGroupVal,
-              onChanged: (value) {
-                setState(() {
-                  if (value == "No") {
-                    controller.setAuction(false);
-                  }
-                  controller.auctionGroupVal = value;
-                });
-              },
-            ),
-            Text("Do you go to Art Fairs?", style: AppFonts.headerFont),
-            RadioListTile<String?>(
-              title: const Text("Yes"),
-              value: "Yes",
-              groupValue: controller.fairGroupVal,
-              onChanged: (value) {
-                setState(() {
-                  if (value == "Yes") {
-                    controller.setFairs(true);
-                  }
-                  controller.fairGroupVal = value;
-                });
-              },
-            ),
-            RadioListTile<String?>(
-              title: const Text("No"),
-              value: "No",
-              groupValue: controller.fairGroupVal,
-              onChanged: (value) {
-                setState(() {
-                  if (value == "No") {
-                    controller.setFairs(false);
-                  }
-                  controller.fairGroupVal = value;
-                });
-              },
+            Row(
+              children: [
+                Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: ScreenSize.isMobile ? 5 : 70,
+                          vertical: 10),
+                      child: Text("What is Your profession?",
+                          style: AppFonts.mediumFont),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: ScreenSize.isMobile ? 5 : 100,
+                          vertical: 10),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Container(
+                            width: 160,
+                            child: RadioListTile<String?>(
+                              title: const Text("Collector"),
+                              value: "Collector",
+                              groupValue: controller.jobGroupVal,
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == "Collector") {
+                                    controller.setIsVIP(false);
+                                  }
+                                  controller.jobGroupVal = value;
+                                });
+                              },
+                            ),
+                          ),
+                          Container(
+                            width: 160,
+                            child: RadioListTile<String?>(
+                              title: const Text("Journalist"),
+                              value: "Journalist",
+                              groupValue: controller.jobGroupVal,
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == "Journalist") {
+                                    controller.setIsVIP(true);
+                                  }
+                                  controller.jobGroupVal = value;
+                                });
+                              },
+                            ),
+                          ),
+                          Container(
+                            width: 160,
+                            child: RadioListTile<String?>(
+                              title: const Text("Curator"),
+                              value: "Curator",
+                              groupValue: controller.jobGroupVal,
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == "Curator") {
+                                    controller.setIsVIP(true);
+                                  }
+                                  controller.jobGroupVal = value;
+                                });
+                              },
+                            ),
+                          ),
+                          Container(
+                            width: 160,
+                            child: RadioListTile<String?>(
+                              title: const Text("Other"),
+                              value: "Other",
+                              groupValue: controller.jobGroupVal,
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == "Other") {
+                                    controller.setIsVIP(false);
+                                  }
+                                  controller.jobGroupVal = value;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: ScreenSize.isMobile ? 5 : 70,
+                          vertical: 10),
+                      child: Text("Do You got to Art Auctions?",
+                          style: AppFonts.mediumFont),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: ScreenSize.isMobile ? 5 : 100,
+                          vertical: 10),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Container(
+                            width: 160,
+                            child: RadioListTile<String?>(
+                              title: const Text("Yes"),
+                              value: "Yes",
+                              groupValue: controller.auctionGroupVal,
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == "Yes") {
+                                    controller.setAuction(true);
+                                  }
+                                  controller.auctionGroupVal = value;
+                                });
+                              },
+                            ),
+                          ),
+                          Container(
+                            width: 160,
+                            child: RadioListTile<String?>(
+                              title: const Text("No"),
+                              value: "No",
+                              groupValue: controller.auctionGroupVal,
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == "No") {
+                                    controller.setAuction(false);
+                                  }
+                                  controller.auctionGroupVal = value;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: ScreenSize.isMobile ? 5 : 70,
+                          vertical: 10),
+                      child: Text("Do You got to Art Fairs?",
+                          style: AppFonts.mediumFont),
+                    ),Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: ScreenSize.isMobile ? 5 : 100,
+                          vertical: 10),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Container(
+                            width: 160,
+                            child: RadioListTile<String?>(
+                              title: const Text("Yes"),
+                              value: "Yes",
+                              groupValue: controller.fairGroupVal,
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == "Yes") {
+                                    controller.setFairs(true);
+                                  }
+                                  controller.fairGroupVal = value;
+                                });
+                              },
+                            ),
+                          ),
+                          Container(
+                            width: 160,
+                            child: RadioListTile<String?>(
+                              title: const Text("No"),
+                              value: "No",
+                              groupValue: controller.fairGroupVal,
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == "No") {
+                                    controller.setFairs(false);
+                                  }
+                                  controller.fairGroupVal = value;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
             ElevatedButton(
               onPressed: () {
@@ -322,42 +419,50 @@ class _LocationPageState extends State<LocationPage> {
 }
 
 class LocationController extends GetxController {
-  User bela = User(id: '0', username: 'Béla');
+  List<Artwork>? artworks = [];
+  final artworkServive = ArtworkService();
+  
+  User bela = User(
+      id: '0',
+      username: 'Béla',
+      auctions: false,
+      fairs: false,
+      isVIP: false,
+      country: 'Hungary');
   String? jobGroupVal = "Other";
   String? auctionGroupVal = "No";
   String? fairGroupVal = "No";
 
+  load() async {
+    artworks = await artworkServive.getArtworks();
+    //for(Artwork a in artworks!){
+    //  print(a.title);
+    //}
+    update();
+  }
+  
   void setFavArtwork(String? s) {
     bela.favArtwork = s;
     print(bela.favArtwork);
   }
-
   void setFavGallery(String? s) {
     bela.favGallery = s;
     print(bela.favGallery);
   }
-
   void setFavArtist(String? s) {
     bela.favArtist = s;
     print(bela.favArtist);
   }
-
-  void setJob(String? s) {
-    bela.job = s;
-    print(bela.job);
+  void setIsVIP(bool s) {
+    bela.isVIP = s;
+    print("IsVIP: " + bela.isVIP.toString());
   }
-
   void setAuction(bool b) {
     bela.auctions = b;
     print("Auctions: " + bela.auctions.toString());
   }
-
   void setFairs(bool b) {
     bela.fairs = b;
     print("Fairs: " + bela.fairs.toString());
-  }
-
-  load() async {
-    update();
   }
 }

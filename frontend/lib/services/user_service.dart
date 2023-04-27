@@ -21,7 +21,14 @@ class UserService {
         User user;
         for (var i = 0; i < jsonData.length; i++) {
           user =
-              User(id: jsonData[i]['_id'], username: jsonData[i]['username']);
+              User(
+                id: jsonData[i]['_id'],
+                username: jsonData[i]['username'],
+                country: jsonData[i]['location'],
+                isVIP: jsonData[i]['isVip'],
+                auctions: jsonData[i]['goAuctions'],
+                fairs: jsonData[i]['goArtfairs']
+                );
           result.add(user);
         }
         return result;
