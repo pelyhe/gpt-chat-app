@@ -20,6 +20,7 @@ import 'general_card.dart';
 import 'job_action_fairs.dart';
 
 class LocationPage extends StatefulWidget {
+  static String idParameterName = "userid";
   const LocationPage({Key? key}) : super(key: key);
 
   @override
@@ -35,6 +36,7 @@ class _LocationPageState extends State<LocationPage> {
   @override
   void initState() {
     super.initState();
+    controller.userid = Get.parameters[LocationPage.idParameterName]!;
     load = controller.load();
   }
 
@@ -400,7 +402,7 @@ class _LocationPageState extends State<LocationPage> {
               onPressed: () {
                 controller.currentUser!.city = cityField.text;
                 controller.currentUser!.country = countryField.text;
-                //controller.userService.updateUser();
+                controller.userService.updateUser(controller.currentUser!);
                 //print("Saving changes");
                 //print(controller.currentUser);
                 //Navigator.pushNamed(context, '/purchasedArtwork');
@@ -417,8 +419,9 @@ class _LocationPageState extends State<LocationPage> {
 }
 
 class LocationController extends GetxController {
+  late String userid;
   List<User>? users = [];
-  User? currentUser;
+  late User currentUser;
   List<Artwork>? artworks = [];
   List<Gallery>? galleries = [];
   List<Artist>? aritsts = [];
@@ -436,10 +439,11 @@ class LocationController extends GetxController {
     galleries = await galleryService.getGalleries();
     aritsts = await artistService.getArtists();
     for(User u in users!){
-      if(u.id == '643d4b3633c74440c12d652a'){ //Alice
+      if(u.id == userid){
         currentUser = u;
       }
     }
+    print(currentUser.username);
     update();
   }
 
@@ -466,33 +470,33 @@ setURL(String title) {
   return 'images/no_image.png';
 }
 
-  void setFavArtwork(String? s) {
-    currentUser!.favArtwork = s;
-    print(currentUser!.favArtwork);
+  void setFavArtwork(String s) {
+    currentUser.favArtwork = s;
+    print(currentUser.favArtwork);
   }
 
-  void setFavGallery(String? s) {
-    currentUser!.favGallery = s;
-    print(currentUser!.favGallery);
+  void setFavGallery(String s) {
+    currentUser.favGallery = s;
+    print(currentUser.favGallery);
   }
 
-  void setFavArtist(String? s) {
-    currentUser!.favArtist = s;
-    print(currentUser!.favArtist);
+  void setFavArtist(String s) {
+    currentUser.favArtist = s;
+    print(currentUser.favArtist);
   }
 
   void setIsVIP(bool s) {
-    currentUser!.isVIP = s;
-    print("IsVIP: " + currentUser!.isVIP.toString());
+    currentUser.isVIP = s;
+    print("IsVIP: " + currentUser.isVIP.toString());
   }
 
   void setAuction(bool b) {
-    currentUser!.auctions = b;
-    print("Auctions: " + currentUser!.auctions.toString());
+    currentUser.auctions = b;
+    print("Auctions: " + currentUser.auctions.toString());
   }
 
   void setFairs(bool b) {
-    currentUser!.fairs = b;
-    print("Fairs: " + currentUser!.fairs.toString());
+    currentUser.fairs = b;
+    print("Fairs: " + currentUser.fairs.toString());
   }
 }

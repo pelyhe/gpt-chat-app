@@ -1,5 +1,5 @@
 from bson import ObjectId
-from fastapi import HTTPException
+from fastapi import HTTPException, Request, Body
 from pydantic import BaseModel
 from config.db import get_db
 db = get_db()
@@ -36,12 +36,19 @@ class UserController(BaseModel):
         else:
             raise HTTPException(status_code=400, detail="Not a valid user or previous messages no previous messages array.")
         
-    #def update_user(id: str):
-        #new_message = {
-         #   "user": prompt,
-          #  "ai": response,
-           # "timestamp": datetime.datetime.now()
-        #}
-
-        #userModel.update_one({"_id": ObjectId(userId)}, {
-         #                    "$push": {"previousMessages": new_message}})
+    def update_user(id: str, location: str, favArtwork: str, favGallery: str, favArtist: str, auctions: str, fairs: str, vip: str):
+        auc = False
+        fair = False
+        isVip = False
+        if(auctions == 'true'):
+            auc = True
+        if(fairs == 'true'):
+            fair = True
+        if(vip == 'true'):
+            isVip = True
+        #Todo update so only not empty strings are uploaded
+        userModel.update_one({"_id": ObjectId(id)}, {
+                                "$push": {"favouriteArtists": favArtist, "favouriteGalleries": favGallery,"favouriteArtworks": favArtwork}, #---
+                                "$set" : {"isVip": isVip,"location": location,"goAuctions": fair,"goArtfairs": auc}, #---
+                             }
+                            )

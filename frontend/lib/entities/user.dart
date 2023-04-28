@@ -4,9 +4,9 @@ class User {
   String country;
   String? city;
   //TODO fav artworks... are stored as an array, this version only stores the quiz results
-  String? favArtwork;
-  String? favGallery;
-  String? favArtist;
+  String favArtwork ="";
+  String favGallery ="";
+  String favArtist = "";
   bool isVIP;
   bool auctions;
   bool fairs;

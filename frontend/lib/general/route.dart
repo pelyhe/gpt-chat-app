@@ -22,12 +22,13 @@ class AppRoutes {
 //
 //    - in the widget where the route goes should be a static String idParameter="<key>"
 //    - get the parameter by Get.parameters[MyPageScreen.idParameter]
+
   static String home = "/";
   static String chat = "/chat";
   static String login = '/login';
   static String signUp = '/register';
   //Preferences Routes
-  static String location ='/location';
+  static String location({required id}) => '/location/:$id';
   static String favArtwork ='/favouriteArtwork';
   static String favGallery ='/favouriteGallery';
   static String favArtist ='/favouriteArtist';
@@ -40,7 +41,7 @@ class AppRoutes {
     GetPage(name: login, page: () => const LoginScreen()),
     GetPage(name: signUp, page: () => const SignUpScreen()),
     //Preferences Pages
-    GetPage(name: location, page: () => const LocationPage()),
+    GetPage(name: location(id: LocationPage.idParameterName), page: () => const LocationPage()),
     GetPage(name: favArtwork, page: () => const FavouriteArtWorksPage()),
     GetPage(name: favGallery, page: () => const FavouriteGalleriesPage()),
     GetPage(name: favArtist, page: () => const FavouriteArtistPage()),

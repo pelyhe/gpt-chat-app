@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'package:project/entities/user.dart';
 import 'package:project/general/fonts.dart';
@@ -89,7 +90,8 @@ class _UserCardState extends State<UserCard> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/location');
+                    Get.toNamed('/location/${widget.user.id}');
+                    //Navigator.pushNamed(context, '/location');
                   },
                   child: Text("Take Preference Quiz".toUpperCase()),
                 ),
