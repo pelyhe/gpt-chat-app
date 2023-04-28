@@ -4,10 +4,9 @@ import 'package:http/http.dart' as http;
 import '../entities/gallery.dart';
 
 class GalleryService {
-  Future<List<Gallery>?> getArtworks() async {
+  Future<List<Gallery>?> getGalleries() async {
     try {
       final response = await http.get(
-          //TODO make /gallery endpoint
           Uri.parse('${dotenv.env['CHAT_API_URL']}/gallery'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',

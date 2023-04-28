@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project/components/background.dart';
+import 'package:project/entities/artist.dart';
 import 'package:project/general/fonts.dart';
 import 'package:project/general/themes.dart';
 import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
 import 'package:project/services/artwork_service.dart';
 import '../../entities/artwork.dart';
+import '../../entities/gallery.dart';
 import '../../entities/user.dart';
+import '../../services/artist_service.dart';
+import '../../services/gallery_service.dart';
 import 'favourite_artist.dart';
 import 'favourite_artworks.dart';
 import 'favourite_galleries.dart';
@@ -66,7 +70,7 @@ class _LocationPageState extends State<LocationPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                  "Can we use Your location to help with better recommendations?",
+                  "Can we use your location to help with better recommendations?",
                   style: AppFonts.headerFont),
               Row(
                 children: [
@@ -109,14 +113,13 @@ class _LocationPageState extends State<LocationPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-                "Can we use Your location to help with better recommendations?",
+                "Can we use your location to help with better recommendations?",
                 style: AppFonts.headerFont),
             Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: ScreenSize.isMobile ? 5 : 300, vertical: 10),
               child: Row(
                 children: [
-                  //TODO save these to DB
                   Expanded(
                     child: TextField(
                       controller: countryField,
@@ -138,69 +141,54 @@ class _LocationPageState extends State<LocationPage> {
                 ],
               ),
             ),
-            Text("Choose the artwork You prefer the most!",
+            Text("Choose the artwork you prefer the most!",
                 style: AppFonts.headerFont),
             Padding(
               padding: EdgeInsets.symmetric(
-                  horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
+                  horizontal: ScreenSize.isMobile ? 5 : 100, vertical: 10),
               child: Row(
                 children: [
-                  GeneralCard(
-                    name: 'Artwork1',
-                    callback: controller.setFavArtwork,
-                  ),
-                  GeneralCard(
-                    name: 'Artwork2',
-                    callback: controller.setFavArtwork,
-                  ),
-                  GeneralCard(
-                    name: 'Artwork2',
-                    callback: controller.setFavArtwork,
-                  ),
+                  for (var a in controller.artworks!)
+                    Expanded(
+                      child: GeneralCard(
+                        name: a.title,
+                        callback: controller.setFavArtwork,
+                      ),
+                    ),
                 ],
               ),
             ),
-            Text("Choose the Gallery You prefer the most!",
+            Text("Choose the Gallery you prefer the most!",
                 style: AppFonts.headerFont),
             Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
               child: Row(
                 children: [
-                  GeneralCard(
-                    name: 'Gallery1',
-                    callback: controller.setFavGallery,
-                  ),
-                  GeneralCard(
-                    name: 'Gallery2',
-                    callback: controller.setFavGallery,
-                  ),
-                  GeneralCard(
-                    name: 'Gallery3',
-                    callback: controller.setFavGallery,
-                  ),
+                  for (var g in controller.galleries!)
+                    Expanded(
+                      child: GeneralCard(
+                        name: g.companyName,
+                        callback: controller.setFavGallery,
+                      ),
+                    ),
                 ],
               ),
             ),
-            Text("Choose the Artist You prefer the most!",
+            Text("Choose the Artist you prefer the most!",
                 style: AppFonts.headerFont),
             Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
               child: Row(
                 children: [
-                  GeneralCard(
-                    name: 'Artist1',
-                    callback: controller.setFavArtist,
-                  ),
-                  GeneralCard(
-                    name: 'Artist2',
-                    callback: controller.setFavArtist,
-                  ),
-                  GeneralCard(
-                    name: 'Artist3',
-                    callback: controller.setFavArtist,
-                  ),
+                  for (var a in controller.aritsts!)
+                    Expanded(
+                      child: GeneralCard(
+                        name: a.name,
+                        callback: controller.setFavArtist,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -353,7 +341,8 @@ class _LocationPageState extends State<LocationPage> {
                           vertical: 10),
                       child: Text("Do You got to Art Fairs?",
                           style: AppFonts.mediumFont),
-                    ),Padding(
+                    ),
+                    Padding(
                       padding: EdgeInsets.symmetric(
                           horizontal: ScreenSize.isMobile ? 5 : 100,
                           vertical: 10),
@@ -403,8 +392,8 @@ class _LocationPageState extends State<LocationPage> {
               onPressed: () {
                 controller.bela.city = cityField.text;
                 controller.bela.country = countryField.text;
-                print("Saving changes");
-                print(controller.bela);
+                //print("Saving changes");
+                //print(controller.bela);
                 //Navigator.pushNamed(context, '/purchasedArtwork');
               },
               child: Text(
@@ -420,8 +409,12 @@ class _LocationPageState extends State<LocationPage> {
 
 class LocationController extends GetxController {
   List<Artwork>? artworks = [];
-  final artworkServive = ArtworkService();
-  
+  List<Gallery>? galleries = [];
+  List<Artist>? aritsts = [];
+  final artworkService = ArtworkService();
+  final galleryService = GalleryService();
+  final artistService = ArtistService();
+
   User bela = User(
       id: '0',
       username: 'Béla',
@@ -434,33 +427,48 @@ class LocationController extends GetxController {
   String? fairGroupVal = "No";
 
   load() async {
-    artworks = await artworkServive.getArtworks();
-    //for(Artwork a in artworks!){
-    //  print(a.title);
-    //}
+    artworks = await artworkService.getArtworks();
+    galleries = await galleryService.getGalleries();
+    aritsts = await artistService.getArtists();
+    /*for (Artwork a in artworks!) {
+      print(a.title);
+    }
+    print(" ");
+    for (Gallery g in galleries!) {
+      print(g.companyName);
+    }
+    print(" ");
+    for (Artist a in aritsts!) {
+      print(a.name);
+    }*/
     update();
   }
-  
+
   void setFavArtwork(String? s) {
     bela.favArtwork = s;
     print(bela.favArtwork);
   }
+
   void setFavGallery(String? s) {
     bela.favGallery = s;
     print(bela.favGallery);
   }
+
   void setFavArtist(String? s) {
     bela.favArtist = s;
     print(bela.favArtist);
   }
+
   void setIsVIP(bool s) {
     bela.isVIP = s;
     print("IsVIP: " + bela.isVIP.toString());
   }
+
   void setAuction(bool b) {
     bela.auctions = b;
     print("Auctions: " + bela.auctions.toString());
   }
+
   void setFairs(bool b) {
     bela.fairs = b;
     print("Fairs: " + bela.fairs.toString());

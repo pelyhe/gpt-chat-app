@@ -5,10 +5,9 @@ import '../entities/artist.dart';
 import '../entities/gallery.dart';
 
 class ArtistService {
-  Future<List<Artist>?> getArtworks() async {
+  Future<List<Artist>?> getArtists() async {
     try {
       final response = await http.get(
-          //TODO make /artist endpoint
           Uri.parse('${dotenv.env['CHAT_API_URL']}/artist'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
