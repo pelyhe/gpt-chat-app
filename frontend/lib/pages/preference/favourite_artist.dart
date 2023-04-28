@@ -118,6 +118,7 @@ Expanded artistCard({required String name}) {
     child: GeneralCard(
       name: name,
       callback: () {},
+      pictureURL: '',
     ),
   );
 }

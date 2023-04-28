@@ -117,7 +117,8 @@ Expanded galleryCard({required String name}) {
   return Expanded(
     child: GeneralCard(
       name: name,
-      callback: () {},
+      callback: () {}, 
+      pictureURL: '',
     ),
   );
 }

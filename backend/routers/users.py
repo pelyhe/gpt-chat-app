@@ -22,3 +22,7 @@ def get_user_by_username(username: str):
 @router.get("/user/{id}/previous-messages")
 def get_previous_messages_by_user_id(id):
     return UserController.get_previous_messages_by_user_id(id)
+
+@router.put("/user/update/{id}")
+def update_user(id):
+    return UserController.update_user(id)

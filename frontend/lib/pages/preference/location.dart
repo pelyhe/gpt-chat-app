@@ -7,6 +7,7 @@ import 'package:project/general/themes.dart';
 import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
 import 'package:project/services/artwork_service.dart';
+import 'package:project/services/user_service.dart';
 import '../../entities/artwork.dart';
 import '../../entities/gallery.dart';
 import '../../entities/user.dart';
@@ -152,7 +153,8 @@ class _LocationPageState extends State<LocationPage> {
                     Expanded(
                       child: GeneralCard(
                         name: a.title,
-                        callback: controller.setFavArtwork,
+                        callback: controller.setFavArtwork, 
+                        pictureURL: controller.setURL(a.title),
                       ),
                     ),
                 ],
@@ -168,8 +170,9 @@ class _LocationPageState extends State<LocationPage> {
                   for (var g in controller.galleries!)
                     Expanded(
                       child: GeneralCard(
-                        name: g.companyName,
+                        name: g.name,
                         callback: controller.setFavGallery,
+                        pictureURL: controller.setURL(g.name),
                       ),
                     ),
                 ],
@@ -187,213 +190,219 @@ class _LocationPageState extends State<LocationPage> {
                       child: GeneralCard(
                         name: a.name,
                         callback: controller.setFavArtist,
+                        pictureURL: controller.setURL(a.name),
                       ),
                     ),
                 ],
               ),
             ),
             //Text("SKIP THIS: Purchased Artworks", style: AppFonts.headerFont),
-            Row(
-              children: [
-                Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: ScreenSize.isMobile ? 5 : 70,
-                          vertical: 10),
-                      child: Text("What is Your profession?",
-                          style: AppFonts.mediumFont),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: ScreenSize.isMobile ? 5 : 100,
-                          vertical: 10),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Container(
-                            width: 160,
-                            child: RadioListTile<String?>(
-                              title: const Text("Collector"),
-                              value: "Collector",
-                              groupValue: controller.jobGroupVal,
-                              onChanged: (value) {
-                                setState(() {
-                                  if (value == "Collector") {
-                                    controller.setIsVIP(false);
-                                  }
-                                  controller.jobGroupVal = value;
-                                });
-                              },
-                            ),
-                          ),
-                          Container(
-                            width: 160,
-                            child: RadioListTile<String?>(
-                              title: const Text("Journalist"),
-                              value: "Journalist",
-                              groupValue: controller.jobGroupVal,
-                              onChanged: (value) {
-                                setState(() {
-                                  if (value == "Journalist") {
-                                    controller.setIsVIP(true);
-                                  }
-                                  controller.jobGroupVal = value;
-                                });
-                              },
-                            ),
-                          ),
-                          Container(
-                            width: 160,
-                            child: RadioListTile<String?>(
-                              title: const Text("Curator"),
-                              value: "Curator",
-                              groupValue: controller.jobGroupVal,
-                              onChanged: (value) {
-                                setState(() {
-                                  if (value == "Curator") {
-                                    controller.setIsVIP(true);
-                                  }
-                                  controller.jobGroupVal = value;
-                                });
-                              },
-                            ),
-                          ),
-                          Container(
-                            width: 160,
-                            child: RadioListTile<String?>(
-                              title: const Text("Other"),
-                              value: "Other",
-                              groupValue: controller.jobGroupVal,
-                              onChanged: (value) {
-                                setState(() {
-                                  if (value == "Other") {
-                                    controller.setIsVIP(false);
-                                  }
-                                  controller.jobGroupVal = value;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: ScreenSize.isMobile ? 5 : 650, vertical: 10),
+              child: Row(
+                children: [
+                  Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: ScreenSize.isMobile ? 5 : 70,
+                            vertical: 10),
+                        child: Text("What is Your profession?",
+                            style: AppFonts.mediumFont),
                       ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: ScreenSize.isMobile ? 5 : 70,
-                          vertical: 10),
-                      child: Text("Do You got to Art Auctions?",
-                          style: AppFonts.mediumFont),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: ScreenSize.isMobile ? 5 : 100,
-                          vertical: 10),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Container(
-                            width: 160,
-                            child: RadioListTile<String?>(
-                              title: const Text("Yes"),
-                              value: "Yes",
-                              groupValue: controller.auctionGroupVal,
-                              onChanged: (value) {
-                                setState(() {
-                                  if (value == "Yes") {
-                                    controller.setAuction(true);
-                                  }
-                                  controller.auctionGroupVal = value;
-                                });
-                              },
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: ScreenSize.isMobile ? 5 : 100,
+                            vertical: 10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              width: 160,
+                              child: RadioListTile<String?>(
+                                title: const Text("Collector"),
+                                value: "Collector",
+                                groupValue: controller.jobGroupVal,
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (value == "Collector") {
+                                      controller.setIsVIP(false);
+                                    }
+                                    controller.jobGroupVal = value;
+                                  });
+                                },
+                              ),
                             ),
-                          ),
-                          Container(
-                            width: 160,
-                            child: RadioListTile<String?>(
-                              title: const Text("No"),
-                              value: "No",
-                              groupValue: controller.auctionGroupVal,
-                              onChanged: (value) {
-                                setState(() {
-                                  if (value == "No") {
-                                    controller.setAuction(false);
-                                  }
-                                  controller.auctionGroupVal = value;
-                                });
-                              },
+                            Container(
+                              width: 160,
+                              child: RadioListTile<String?>(
+                                title: const Text("Journalist"),
+                                value: "Journalist",
+                                groupValue: controller.jobGroupVal,
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (value == "Journalist") {
+                                      controller.setIsVIP(true);
+                                    }
+                                    controller.jobGroupVal = value;
+                                  });
+                                },
+                              ),
                             ),
-                          ),
-                        ],
+                            Container(
+                              width: 160,
+                              child: RadioListTile<String?>(
+                                title: const Text("Curator"),
+                                value: "Curator",
+                                groupValue: controller.jobGroupVal,
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (value == "Curator") {
+                                      controller.setIsVIP(true);
+                                    }
+                                    controller.jobGroupVal = value;
+                                  });
+                                },
+                              ),
+                            ),
+                            Container(
+                              width: 160,
+                              child: RadioListTile<String?>(
+                                title: const Text("Other"),
+                                value: "Other",
+                                groupValue: controller.jobGroupVal,
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (value == "Other") {
+                                      controller.setIsVIP(false);
+                                    }
+                                    controller.jobGroupVal = value;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: ScreenSize.isMobile ? 5 : 70,
-                          vertical: 10),
-                      child: Text("Do You got to Art Fairs?",
-                          style: AppFonts.mediumFont),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: ScreenSize.isMobile ? 5 : 100,
-                          vertical: 10),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Container(
-                            width: 160,
-                            child: RadioListTile<String?>(
-                              title: const Text("Yes"),
-                              value: "Yes",
-                              groupValue: controller.fairGroupVal,
-                              onChanged: (value) {
-                                setState(() {
-                                  if (value == "Yes") {
-                                    controller.setFairs(true);
-                                  }
-                                  controller.fairGroupVal = value;
-                                });
-                              },
-                            ),
-                          ),
-                          Container(
-                            width: 160,
-                            child: RadioListTile<String?>(
-                              title: const Text("No"),
-                              value: "No",
-                              groupValue: controller.fairGroupVal,
-                              onChanged: (value) {
-                                setState(() {
-                                  if (value == "No") {
-                                    controller.setFairs(false);
-                                  }
-                                  controller.fairGroupVal = value;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: ScreenSize.isMobile ? 5 : 70,
+                            vertical: 10),
+                        child: Text("Do You got to Art Auctions?",
+                            style: AppFonts.mediumFont),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: ScreenSize.isMobile ? 5 : 100,
+                            vertical: 10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              width: 160,
+                              child: RadioListTile<String?>(
+                                title: const Text("Yes"),
+                                value: "Yes",
+                                groupValue: controller.auctionGroupVal,
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (value == "Yes") {
+                                      controller.setAuction(true);
+                                    }
+                                    controller.auctionGroupVal = value;
+                                  });
+                                },
+                              ),
+                            ),
+                            Container(
+                              width: 160,
+                              child: RadioListTile<String?>(
+                                title: const Text("No"),
+                                value: "No",
+                                groupValue: controller.auctionGroupVal,
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (value == "No") {
+                                      controller.setAuction(false);
+                                    }
+                                    controller.auctionGroupVal = value;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: ScreenSize.isMobile ? 5 : 70,
+                            vertical: 10),
+                        child: Text("Do You got to Art Fairs?",
+                            style: AppFonts.mediumFont),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: ScreenSize.isMobile ? 5 : 100,
+                            vertical: 10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              width: 160,
+                              child: RadioListTile<String?>(
+                                title: const Text("Yes"),
+                                value: "Yes",
+                                groupValue: controller.fairGroupVal,
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (value == "Yes") {
+                                      controller.setFairs(true);
+                                    }
+                                    controller.fairGroupVal = value;
+                                  });
+                                },
+                              ),
+                            ),
+                            Container(
+                              width: 160,
+                              child: RadioListTile<String?>(
+                                title: const Text("No"),
+                                value: "No",
+                                groupValue: controller.fairGroupVal,
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (value == "No") {
+                                      controller.setFairs(false);
+                                    }
+                                    controller.fairGroupVal = value;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             ElevatedButton(
               onPressed: () {
-                controller.bela.city = cityField.text;
-                controller.bela.country = countryField.text;
+                controller.currentUser!.city = cityField.text;
+                controller.currentUser!.country = countryField.text;
+                //controller.userService.updateUser();
                 //print("Saving changes");
-                //print(controller.bela);
+                //print(controller.currentUser);
                 //Navigator.pushNamed(context, '/purchasedArtwork');
               },
               child: Text(
@@ -408,69 +417,82 @@ class _LocationPageState extends State<LocationPage> {
 }
 
 class LocationController extends GetxController {
+  List<User>? users = [];
+  User? currentUser;
   List<Artwork>? artworks = [];
   List<Gallery>? galleries = [];
   List<Artist>? aritsts = [];
+  final userService = UserService();
   final artworkService = ArtworkService();
   final galleryService = GalleryService();
   final artistService = ArtistService();
-
-  User bela = User(
-      id: '0',
-      username: 'Béla',
-      auctions: false,
-      fairs: false,
-      isVIP: false,
-      country: 'Hungary');
   String? jobGroupVal = "Other";
   String? auctionGroupVal = "No";
   String? fairGroupVal = "No";
 
   load() async {
+    users = await userService.getUsers();
     artworks = await artworkService.getArtworks();
     galleries = await galleryService.getGalleries();
     aritsts = await artistService.getArtists();
-    /*for (Artwork a in artworks!) {
-      print(a.title);
+    for(User u in users!){
+      if(u.id == '643d4b3633c74440c12d652a'){ //Alice
+        currentUser = u;
+      }
     }
-    print(" ");
-    for (Gallery g in galleries!) {
-      print(g.companyName);
-    }
-    print(" ");
-    for (Artist a in aritsts!) {
-      print(a.name);
-    }*/
     update();
   }
 
+setURL(String title) {
+  if(title == "Bond Street I"){
+    return 'images/bond_street_I_picture.png';
+  }
+  if(title == "Mile End"){
+    return 'images/mile_end_picture.png';
+  }
+  if(title == "Brompton Road"){
+    return 'images/brompton_road_picture.png';
+  }
+
+  if(title == "Koller Gallery"){
+    return 'images/koller_gallery.jpg';
+  }
+  if(title == "Misa Art"){
+    return 'images/misa_art_gallery.jpg';
+  }
+  if(title == "The British Museum"){
+    return 'images/british_museum_gallery.jpg';
+  }
+  return 'images/no_image.png';
+}
+
   void setFavArtwork(String? s) {
-    bela.favArtwork = s;
-    print(bela.favArtwork);
+    currentUser!.favArtwork = s;
+    print(currentUser!.favArtwork);
   }
 
   void setFavGallery(String? s) {
-    bela.favGallery = s;
-    print(bela.favGallery);
+    currentUser!.favGallery = s;
+    print(currentUser!.favGallery);
   }
 
   void setFavArtist(String? s) {
-    bela.favArtist = s;
-    print(bela.favArtist);
+    currentUser!.favArtist = s;
+    print(currentUser!.favArtist);
   }
 
   void setIsVIP(bool s) {
-    bela.isVIP = s;
-    print("IsVIP: " + bela.isVIP.toString());
+    currentUser!.isVIP = s;
+    print("IsVIP: " + currentUser!.isVIP.toString());
   }
 
   void setAuction(bool b) {
-    bela.auctions = b;
-    print("Auctions: " + bela.auctions.toString());
+    currentUser!.auctions = b;
+    print("Auctions: " + currentUser!.auctions.toString());
   }
 
   void setFairs(bool b) {
-    bela.fairs = b;
-    print("Fairs: " + bela.fairs.toString());
+    currentUser!.fairs = b;
+    print("Fairs: " + currentUser!.fairs.toString());
   }
 }

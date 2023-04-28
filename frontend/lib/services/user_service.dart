@@ -20,15 +20,13 @@ class UserService {
         final List<User> result = [];
         User user;
         for (var i = 0; i < jsonData.length; i++) {
-          user =
-              User(
-                id: jsonData[i]['_id'],
-                username: jsonData[i]['username'],
-                country: jsonData[i]['location'],
-                isVIP: jsonData[i]['isVip'],
-                auctions: jsonData[i]['goAuctions'],
-                fairs: jsonData[i]['goArtfairs']
-                );
+          user = User(
+              id: jsonData[i]['_id'],
+              username: jsonData[i]['username'],
+              country: jsonData[i]['location'],
+              isVIP: jsonData[i]['isVip'],
+              auctions: jsonData[i]['goAuctions'],
+              fairs: jsonData[i]['goArtfairs']);
           result.add(user);
         }
         return result;
@@ -55,14 +53,12 @@ class UserService {
           message = Message(
               text: jsonData[i]['user'],
               date: DateTime.parse(jsonData[i]['timestamp']),
-              isSentByMe: true
-          );
+              isSentByMe: true);
           result.add(message);
           message = Message(
-            text: jsonData[i]['ai'],
-            date: DateTime.parse(jsonData[i]['timestamp']),
-            isSentByMe: false
-          );
+              text: jsonData[i]['ai'],
+              date: DateTime.parse(jsonData[i]['timestamp']),
+              isSentByMe: false);
           result.add(message);
         }
         return result;
@@ -70,5 +66,21 @@ class UserService {
     } catch (error) {
       return null;
     }
+  }
+
+  Future<http.Response> updateUser(String id, User u) async {
+    return http.post(
+      Uri.parse('${dotenv.env['CHAT_API_URL']}/user/update/$id'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'userName': u.username,
+        'location': u.country,
+        'goAuctions': u.auctions.toString(),
+        'goArtfairs': u.fairs.toString(),
+        'isVip': u.isVIP.toString(),
+      }),
+    );
   }
 }

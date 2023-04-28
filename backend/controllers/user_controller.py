@@ -35,3 +35,13 @@ class UserController(BaseModel):
             return previous_messages
         else:
             raise HTTPException(status_code=400, detail="Not a valid user or previous messages no previous messages array.")
+        
+    #def update_user(id: str):
+        #new_message = {
+         #   "user": prompt,
+          #  "ai": response,
+           # "timestamp": datetime.datetime.now()
+        #}
+
+        #userModel.update_one({"_id": ObjectId(userId)}, {
+         #                    "$push": {"previousMessages": new_message}})

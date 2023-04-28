@@ -7,13 +7,19 @@ import 'package:project/general/utils.dart';
 class GeneralCard extends StatefulWidget {
   bool isHovering = false;
   String name;
+  String pictureURL;
   Function callback;
 
   final hoveredTransform = Matrix4.identity()
     ..translate(-7, 4)
     ..scale(1.02);
 
-  GeneralCard({Key? key, required this.name, required this.callback}) : super(key: key);
+  GeneralCard(
+      {Key? key,
+      required this.name,
+      required this.callback,
+      required this.pictureURL})
+      : super(key: key);
 
   @override
   State<GeneralCard> createState() => _GeneralCardState();
@@ -31,7 +37,7 @@ class _GeneralCardState extends State<GeneralCard> {
         widget.callback(widget.name);
         //TODO color change
         //Navigator.pushNamed(context, '/chat?id=${widget.user.id}');
-      }, 
+      },
       onHover: (isHovering) {
         if (isHovering) {
           if (mounted) {
@@ -60,24 +66,16 @@ class _GeneralCardState extends State<GeneralCard> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: CircleAvatar(
-                    radius: ScreenSize.isDesktop
-                        ? // responsive size
-                        85
-                        : ScreenSize.isTablet
-                            ? 65
-                            : 30,
-                    backgroundColor: AppColors.kPrimaryColor,
-                    child: ScreenSize.isDesktop
-                            ? createAvatarFromName(
-                                80, widget.name, 0)
-                            : ScreenSize.isTablet
-                                ? createAvatarFromName(
-                                    60, widget.name, 0)
-                                : createAvatarFromName(
-                                    40, widget.name, 0),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: AssetImage(widget.pictureURL),
+                            fit: BoxFit.cover),
+                      ),
+                    ),
                   ),
                 ),
                 Padding(
