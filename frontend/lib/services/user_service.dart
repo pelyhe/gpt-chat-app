@@ -13,11 +13,15 @@ class UserService {
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           });
+
+      print(response.statusCode);
       if (response.statusCode != 200) {
         return null;
       } else {
         final List<dynamic> jsonData = jsonDecode(response.body);
         final List<User> result = [];
+        print(response);
+        print(jsonDecode(response.body));
         User user;
         for (var i = 0; i < jsonData.length; i++) {
           user =
