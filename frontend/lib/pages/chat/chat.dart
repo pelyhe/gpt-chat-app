@@ -145,9 +145,6 @@ class ChatController extends GetxController {
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
-    for (var m in messages!) {
-      print(m.text);
-    }
     update();
   }
 }

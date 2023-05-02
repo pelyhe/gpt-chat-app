@@ -8,7 +8,12 @@ import 'package:url_strategy/url_strategy.dart';
 
 void main() async {
   setPathUrlStrategy();
-  await dotenv.load(fileName: "environment/.env");
+  String environment = const String.fromEnvironment('ENVIRONMENT');
+  if (environment != 'local') {
+    await dotenv.load(fileName: "assets/env/.env.prod");
+  } else {
+    await dotenv.load(fileName: "env/.env.local");
+  }
   runApp(const MyApp());
 }
 
