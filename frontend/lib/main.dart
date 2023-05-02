@@ -10,9 +10,9 @@ void main() async {
   setPathUrlStrategy();
   String environment = const String.fromEnvironment('ENVIRONMENT');
   if (environment != 'local') {
-    await dotenv.load(fileName: "assets/env/.env.prod");
+    await dotenv.load(fileName: "assets/environment/.env.prod");
   } else {
-    await dotenv.load(fileName: "env/.env.local");
+    await dotenv.load(fileName: "environment/.env.local");
   }
   runApp(const MyApp());
 }
