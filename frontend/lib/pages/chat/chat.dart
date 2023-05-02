@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -92,7 +94,7 @@ class _ChatPageState extends State<ChatPage> {
         child: Column(children: [
           for (var message in controller.messages!)
             BubbleNormal(
-              text: message.text,
+              text: utf8.decode(message.text.codeUnits),
               color: message.isSentByMe ? AppColors.blue : Colors.grey.shade300,
               isSender: message.isSentByMe,
               textStyle: TextStyle(

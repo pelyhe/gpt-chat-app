@@ -1,5 +1,7 @@
 import logging
 from pathlib import Path
+
+import llama_index
 LOG_FILE_PATH = 'config/requests.log'
 logging.basicConfig(filename=LOG_FILE_PATH, filemode='a', level=logging.CRITICAL,
                     format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
@@ -18,6 +20,7 @@ from config.db import get_db
 
 os.environ['OPENAI_API_KEY'] = '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'
 DOCUMENTS_DIRECTORY = 'data'
+GRAPH_INDEX_FILENAME = '__graph_index__.json'
 
 db = get_db()
 userModel = db['users']
@@ -48,8 +51,14 @@ class ChatController(BaseModel):
             curr_index = GPTSimpleVectorIndex.from_documents(
                 doc_set[filename], service_context=service_context)
             index_set[filename] = curr_index
-            # curr_index.save_to_disk(f'index_{filename}.json') TODO:
+            curr_index.save_to_disk(f'indices/index_{filename}.json') 
         
+        # Load indices from disk
+        # index_set = {}
+        # for filename in os.listdir(DOCUMENTS_DIRECTORY):
+        #     curr_index = GPTSimpleVectorIndex.load_from_disk(f'indices/index_{filename}.json')
+        #     index_set[filename] = curr_index
+
         llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-3.5-turbo", max_tokens=1000))
         service_context = ServiceContext.from_defaults(
             llm_predictor=llm_predictor)
@@ -60,9 +69,14 @@ class ChatController(BaseModel):
             GPTListIndex,
             [index_set[f] for f in os.listdir(DOCUMENTS_DIRECTORY)],
             index_summaries=[
-                "useful for when you need to answer questions about the gallery, artworks, Sara Dobai, Rober Bresson, Glassyard Gallery, exhibition, art world, user category, user type, user's class, any information about the user or people related to art." for x in index_set],
+                "useful for when you need to answer questions about the gallery, artworks, Sara Dobai, Rober Bresson, Glassyard Gallery, exhibition, user category/type, user classification, any information about the user or people related to art." for x in index_set],
             service_context=service_context
         )
+
+        graph.save_to_disk(f'indices/'+ GRAPH_INDEX_FILENAME)
+
+        
+        # graph = ComposableGraph.load_from_disk(f'indices/'+ GRAPH_INDEX_FILENAME)
 
         decompose_transform = DecomposeQueryTransform(
             llm_predictor, verbose=True
@@ -93,7 +107,7 @@ class ChatController(BaseModel):
         graph_config = GraphToolConfig(
             graph=graph,
             name=f"Graph Index",
-            description="useful for when you need to answer questions about the gallery, artworks, Sara Dobai, Rober Bresson, Glassyard Gallery, exhibition, art world, user category, user type, user's class, any information about the user or people related to art.",
+            description="useful for when you need to answer questions about the gallery, artworks, Sara Dobai, Rober Bresson, Glassyard Gallery, exhibition, user category/type, user classification, any information about the user or people related to art.",
             query_configs=query_configs,
             tool_kwargs={"return_direct": True}
         )
@@ -110,21 +124,22 @@ class ChatController(BaseModel):
         user_catagory_config = IndexToolConfig(
             index=index_set['user_categorize.docx'],
                 name=f"Vector Index User",
-                description=f"useful for when you need to answer questions about the user's category, user's type, user's class, or when you need to answer something about the user or the collector. based on the previous conversation the user's type can be classified by this description",
+                description=f"useful for when you need to categorize the user, tell the type of the user or some information about the user you are talking to.",
                 index_query_kwargs={"similarity_top_k": 3},
                 tool_kwargs={"return_direct": True}
         )
-        facts_config = IndexToolConfig(
-            index=index_set['policy.docx'],
-                name=f"Vector Index User",
-                description=f"contraints for recommending auctions, galleries or other sources of artworks",
-                index_query_kwargs={"similarity_top_k": 3},
-                tool_kwargs={"return_direct": True}
-        )
+        # TODO: for policies!
+        # facts_config = IndexToolConfig(
+        #     index=index_set['policy.docx'],
+        #         name=f"Vector Index User",
+        #         description=f"contraints for recommending auctions, galleries or other sources of artworks",
+        #         index_query_kwargs={"similarity_top_k": 3},
+        #         tool_kwargs={"return_direct": True}
+        # )
 
         index_configs.append(gallery_config)
         index_configs.append(user_catagory_config)
-        index_configs.append(facts_config)
+        #index_configs.append(facts_config)
 
         toolkit = LlamaToolkit(
             index_configs=index_configs,
