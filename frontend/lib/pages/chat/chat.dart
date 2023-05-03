@@ -91,41 +91,63 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _desktopBody() {
     return Column(children: [
-      Expanded(
-        child: SingleChildScrollView(
-          child: Column(children: [
-            for (var message in controller.messages!)
-              BubbleNormal(
-                text: utf8.decode(message.text.codeUnits),
-                color:
-                    message.isSentByMe ? AppColors.blue : Colors.grey.shade300,
-                isSender: message.isSentByMe,
-                textStyle: TextStyle(
-                    color: message.isSentByMe ? Colors.white : Colors.black),
-              ),
-          ]),
-        ),
+     Expanded(
+      child: SingleChildScrollView(
+        child: Column(children: [
+          for (var message in controller.messages!)
+            Row(
+              children: [
+                Expanded(
+                  child: BubbleNormal(
+                    text: utf8.decode(message.text.codeUnits),
+                    color: message.isSentByMe
+                        ? AppColors.blue
+                        : Colors.grey.shade300,
+                    isSender: message.isSentByMe,
+                    textStyle: TextStyle(
+                        color:
+                            message.isSentByMe ? Colors.white : Colors.black),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.thumb_up),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: const Icon(Icons.thumb_down),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: const Icon(Icons.question_mark),
+                  onPressed: () {},
+                ),
+
+                //const SizedBox(width: 30, height: 70)
+              ],
+            ),
+        ]),
+      ),
       ),
       Align(
-        child: Column(
-          children: [
-            ElevatedButton(
-                onPressed: () => controller.getUserCategory(context),
-                child: const Text("What type of collector am I?")),
-            MessageBar(
-              sendButtonColor: AppColors.appColorBlue,
-              onSend: (text) async {
-                final message =
-                    Message(text: text, date: DateTime.now(), isSentByMe: true);
-                setState(() {
-                  controller.messages!.add(message);
-                });
-                await controller.sendMessage(context, message);
-              },
-            ),
-          ],
-        ),
-      )
+              child: Column(
+                children: [
+                  ElevatedButton(
+                      onPressed: () => controller.getUserCategory(context),
+                      child: const Text("What type of collector am I?")),
+                  MessageBar(
+                    sendButtonColor: AppColors.appColorBlue,
+                    onSend: (text) async {
+                      final message =
+                          Message(text: text, date: DateTime.now(), isSentByMe: true);
+                      setState(() {
+                        controller.messages!.add(message);
+                      });
+                      await controller.sendMessage(context, message);
+                    },
+                  ),
+                ],
+              )
+           )
     ]);
   }
 }
@@ -138,6 +160,9 @@ class ChatController extends GetxController {
 
   loadMessages() async {
     messages = await userService.getPreviousMessagesByUserId(id);
+    for (var m in messages!) {
+      //print(m.text);
+    }
     update();
   }
 
