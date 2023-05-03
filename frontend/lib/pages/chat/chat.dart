@@ -13,6 +13,8 @@ import 'package:project/pages/loading.dart';
 import 'package:project/services/chat_service.dart';
 import 'package:project/services/user_service.dart';
 
+import 'feedbackPopup.dart';
+
 class ChatPage extends StatefulWidget {
   const ChatPage({Key? key}) : super(key: key);
 
@@ -91,63 +93,69 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _desktopBody() {
     return Column(children: [
-     Expanded(
-      child: SingleChildScrollView(
-        child: Column(children: [
-          for (var message in controller.messages!)
-            Row(
-              children: [
-                Expanded(
-                  child: BubbleNormal(
-                    text: utf8.decode(message.text.codeUnits),
-                    color: message.isSentByMe
-                        ? AppColors.blue
-                        : Colors.grey.shade300,
-                    isSender: message.isSentByMe,
-                    textStyle: TextStyle(
-                        color:
-                            message.isSentByMe ? Colors.white : Colors.black),
+      Expanded(
+        child: SingleChildScrollView(
+          child: Column(children: [
+            for (var message in controller.messages!)
+              Row(
+                children: [
+                  Expanded(
+                    child: BubbleNormal(
+                      text: utf8.decode(message.text.codeUnits),
+                      color: message.isSentByMe
+                          ? AppColors.blue
+                          : Colors.grey.shade300,
+                      isSender: message.isSentByMe,
+                      textStyle: TextStyle(
+                          color:
+                              message.isSentByMe ? Colors.white : Colors.black),
+                    ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.thumb_up),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon: const Icon(Icons.thumb_down),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon: const Icon(Icons.question_mark),
-                  onPressed: () {},
-                ),
+                  if (message.isSentByMe == false)
+                    IconButton(
+                      icon: const Icon(Icons.thumb_up),
+                      onPressed: () => {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext ctx) => FeedbackPopup())
+                  },
+                    ),
+                  if (message.isSentByMe == false)
+                    IconButton(
+                      icon: const Icon(Icons.thumb_down),
+                      onPressed: () {},
+                    ),
+                  if (message.isSentByMe == false)
+                    IconButton(
+                      icon: const Icon(Icons.question_mark),
+                      onPressed: () {},
+                    ),
 
-                //const SizedBox(width: 30, height: 70)
-              ],
-            ),
-        ]),
-      ),
+                  //const SizedBox(width: 30, height: 70)
+                ],
+              ),
+          ]),
+        ),
       ),
       Align(
-              child: Column(
-                children: [
-                  ElevatedButton(
-                      onPressed: () => controller.getUserCategory(context),
-                      child: const Text("What type of collector am I?")),
-                  MessageBar(
-                    sendButtonColor: AppColors.appColorBlue,
-                    onSend: (text) async {
-                      final message =
-                          Message(text: text, date: DateTime.now(), isSentByMe: true);
-                      setState(() {
-                        controller.messages!.add(message);
-                      });
-                      await controller.sendMessage(context, message);
-                    },
-                  ),
-                ],
-              )
-           )
+          child: Column(
+        children: [
+          ElevatedButton(
+              onPressed: () => controller.getUserCategory(context),
+              child: const Text("What type of collector am I?")),
+          MessageBar(
+            sendButtonColor: AppColors.appColorBlue,
+            onSend: (text) async {
+              final message =
+                  Message(text: text, date: DateTime.now(), isSentByMe: true);
+              setState(() {
+                controller.messages!.add(message);
+              });
+              await controller.sendMessage(context, message);
+            },
+          ),
+        ],
+      ))
     ]);
   }
 }
@@ -222,8 +230,7 @@ class ChatController extends GetxController {
     }
 
     final snackBar = SnackBar(
-      content:
-          Text(text, style: const TextStyle(fontSize: 20)),
+      content: Text(text, style: const TextStyle(fontSize: 20)),
       backgroundColor: Colors.green,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
