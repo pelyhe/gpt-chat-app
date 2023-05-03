@@ -91,63 +91,62 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _desktopBody() {
     return Column(children: [
-     Expanded(
-      child: SingleChildScrollView(
-        child: Column(children: [
-          for (var message in controller.messages!)
-            Row(
-              children: [
-                Expanded(
-                  child: BubbleNormal(
-                    text: utf8.decode(message.text.codeUnits),
-                    color: message.isSentByMe
-                        ? AppColors.blue
-                        : Colors.grey.shade300,
-                    isSender: message.isSentByMe,
-                    textStyle: TextStyle(
-                        color:
-                            message.isSentByMe ? Colors.white : Colors.black),
+      Expanded(
+        child: SingleChildScrollView(
+          child: Column(children: [
+            for (var message in controller.messages!)
+              Row(
+                children: [
+                  Expanded(
+                    child: BubbleNormal(
+                      text: utf8.decode(message.text.codeUnits),
+                      color: message.isSentByMe
+                          ? AppColors.blue
+                          : Colors.grey.shade300,
+                      isSender: message.isSentByMe,
+                      textStyle: TextStyle(
+                          color:
+                              message.isSentByMe ? Colors.white : Colors.black),
+                    ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.thumb_up),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon: const Icon(Icons.thumb_down),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon: const Icon(Icons.question_mark),
-                  onPressed: () {},
-                ),
+                  // IconButton(
+                  //   icon: const Icon(Icons.thumb_up),
+                  //   onPressed: () {},
+                  // ),
+                  // IconButton(
+                  //   icon: const Icon(Icons.thumb_down),
+                  //   onPressed: () {},
+                  // ),
+                  // IconButton(
+                  //   icon: const Icon(Icons.question_mark),
+                  //   onPressed: () {},
+                  // ),
 
-                //const SizedBox(width: 30, height: 70)
-              ],
-            ),
-        ]),
-      ),
+                  //const SizedBox(width: 30, height: 70)
+                ],
+              ),
+          ]),
+        ),
       ),
       Align(
-              child: Column(
-                children: [
-                  ElevatedButton(
-                      onPressed: () => controller.getUserCategory(context),
-                      child: const Text("What type of collector am I?")),
-                  MessageBar(
-                    sendButtonColor: AppColors.appColorBlue,
-                    onSend: (text) async {
-                      final message =
-                          Message(text: text, date: DateTime.now(), isSentByMe: true);
-                      setState(() {
-                        controller.messages!.add(message);
-                      });
-                      await controller.sendMessage(context, message);
-                    },
-                  ),
-                ],
-              )
-           )
+          child: Column(
+        children: [
+          ElevatedButton(
+              onPressed: () => controller.getUserCategory(context),
+              child: const Text("What type of collector am I?")),
+          MessageBar(
+            sendButtonColor: AppColors.appColorBlue,
+            onSend: (text) async {
+              final message =
+                  Message(text: text, date: DateTime.now(), isSentByMe: true);
+              setState(() {
+                controller.messages!.add(message);
+              });
+              await controller.sendMessage(context, message);
+            },
+          ),
+        ],
+      ))
     ]);
   }
 }
@@ -190,6 +189,13 @@ class ChatController extends GetxController {
     if (messages!.isEmpty) {
       text =
           "Cannot determine the collector's category without previous messages.";
+
+      final snackBar = SnackBar(
+        content: Text(text, style: const TextStyle(fontSize: 20)),
+        backgroundColor: Colors.red,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
     } else if (messages!.length < 5) {
       List<String> myMessages = [];
       for (var m in messages!) {
@@ -222,8 +228,7 @@ class ChatController extends GetxController {
     }
 
     final snackBar = SnackBar(
-      content:
-          Text(text, style: const TextStyle(fontSize: 20)),
+      content: Text(text, style: const TextStyle(fontSize: 20)),
       backgroundColor: Colors.green,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
