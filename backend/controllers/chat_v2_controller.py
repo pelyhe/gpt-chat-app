@@ -1,7 +1,6 @@
 import logging
 from pathlib import Path
-
-import llama_index
+from controllers.user_controller import UserController
 LOG_FILE_PATH = 'config/requests.log'
 logging.basicConfig(filename=LOG_FILE_PATH, filemode='a', level=logging.CRITICAL,
                     format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
@@ -29,7 +28,7 @@ userModel = db['users']
 
 class ChatController(BaseModel):
 
-    def create_chat_agent(memory):
+    def _create_chat_agent(memory):
 
         doc_set = {}
         all_docs = []
@@ -69,13 +68,13 @@ class ChatController(BaseModel):
             GPTListIndex,
             [index_set[f] for f in os.listdir(DOCUMENTS_DIRECTORY)],
             index_summaries=[
-                "useful for when you need to answer questions about the gallery, artworks, Sara Dobai, Rober Bresson, Glassyard Gallery, exhibition, user category/type, user classification, any information about the user or people related to art." for x in index_set],
+                "useful for when you need to answer questions about the gallery, artworks, Sara Dobai, Rober Bresson, Glassyard Gallery, exhibition or any information about people related to art." for x in index_set],
             service_context=service_context
         )
 
         graph.save_to_disk(f'indices/'+ GRAPH_INDEX_FILENAME)
 
-        
+
         # graph = ComposableGraph.load_from_disk(f'indices/'+ GRAPH_INDEX_FILENAME)
 
         decompose_transform = DecomposeQueryTransform(
@@ -116,18 +115,18 @@ class ChatController(BaseModel):
         index_configs = []
         gallery_config = IndexToolConfig(
             index=index_set['gallery_model.docx'],
-                name=f"Vector Index Gallery",
-                description=f"useful for when you need to answer questions about the gallery, artworks, Sara Dobai, Rober Bresson, Glassyard Gallery, exhibition, art world, or people related to art.",
+                name=f"Gallery index",
+                description=f"useful for when you need to answer questions about the gallery, artworks, photography, videos, Sara Dobai, Rober Bresson, Glassyard Gallery, exhibition, art.",
                 index_query_kwargs={"similarity_top_k": 3},
                 tool_kwargs={"return_direct": True}
         )
-        user_catagory_config = IndexToolConfig(
-            index=index_set['user_categorize.docx'],
-                name=f"Vector Index User",
-                description=f"useful for when you need to categorize the user, tell the type of the user or some information about the user you are talking to.",
-                index_query_kwargs={"similarity_top_k": 3},
-                tool_kwargs={"return_direct": True}
-        )
+        # user_catagory_config = IndexToolConfig(
+        #     index=index_set['user_categorize.docx'],
+        #         name=f"User index",
+        #         description=f"useful for when you need to answer the question: What user category do I belong to?",
+        #         index_query_kwargs={"similarity_top_k": 3},
+        #         tool_kwargs={"return_direct": True}
+        # )
         # TODO: for policies!
         # facts_config = IndexToolConfig(
         #     index=index_set['policy.docx'],
@@ -138,8 +137,8 @@ class ChatController(BaseModel):
         # )
 
         index_configs.append(gallery_config)
-        index_configs.append(user_catagory_config)
-        #index_configs.append(facts_config)
+        # index_configs.append(user_catagory_config)
+        # index_configs.append(facts_config)
 
         toolkit = LlamaToolkit(
             index_configs=index_configs,
@@ -155,7 +154,7 @@ class ChatController(BaseModel):
             verbose=True
         )
 
-    def update_previous_messages(userId: str, prompt: str, response: str):
+    def _update_previous_messages(userId: str, prompt: str, response: str):
         new_message = {
             "user": prompt,
             "ai": response,
@@ -165,11 +164,39 @@ class ChatController(BaseModel):
         userModel.update_one({"_id": ObjectId(userId)}, {
                              "$push": {"previousMessages": new_message}})
 
-    def log_to_file(prompt, responseTime, succeed, errorMessage=None):
+    def _log_to_file(prompt, responseTime, succeed, errorMessage=None):
         if succeed:
             logging.critical('RESPONSE TIME: '+ responseTime +'. Question: '+ prompt)
         else:
             logging.critical('ERROR: ' + errorMessage)
+
+    # after every 5 questions, update db with user's category
+    def _update_user_category(id: str):
+        document = userModel.find_one({"_id": id})
+        previousMessages = document['previousMessages']
+        if len(previousMessages) % 5 == 0 and len(previousMessages) != 0:
+            lastMessages = previousMessages[-5:]
+            lastQuestions = lastMessages[0]['user']
+            lastMessages.pop(0)
+            for conv in lastMessages:
+                lastQuestions = lastQuestions + " | " + conv['user']
+            result = UserController.categorize_user_by_id(lastQuestions)
+            result = str(result)
+            
+            filter = { "_id": id }
+            
+            if "investor" in result.lower():
+                update = { "$set": { "category": "investor" } }
+                userModel.update_one(filter, update)
+            elif "lover" in result.lower():
+                update = { "$set": { "category": "art-lover" } }
+                userModel.update_one(filter, update)
+            elif "impulsive" in result.lower():
+                update = { "$set": { "category": "impulsive" } }
+                userModel.update_one(filter, update)
+            elif "thematic" in result.lower():
+                update = { "$set": { "category": "thematic" } }
+                userModel.update_one(filter, update)
 
 
     @classmethod
@@ -187,27 +214,29 @@ class ChatController(BaseModel):
             # load the memory according to the user id
             with open('conv_memory/'+id+'.pickle', 'rb') as handle:
                 mem = pickle.load(handle)
-        agent_executor = cls.create_chat_agent(mem)
 
-        beforeResponseTimestamp = datetime.datetime.now()
+        cls._update_user_category(id=objId)
+        agent_executor = cls._create_chat_agent(mem)
+
+        # beforeResponseTimestamp = datetime.datetime.now()
         # for could not parse LLM output
         try:
-            response = agent_executor.run(input=prompt)
+            response = agent_executor.run(input=prompt + ". Please act like you are a galleries in Glassyard, feel free to ask questions from me.")
         except ValueError as e:
             response = str(e)
             if not response.startswith("Could not parse LLM output: `"):
-                cls.log_to_file(prompt, responseTime, succeed=False, errorMessage=str(e))
+                # cls._log_to_file(prompt, responseTime, succeed=False, errorMessage=str(e))
                 raise e
             response = response.removeprefix(
                 "Could not parse LLM output: `").removesuffix("`")
 
-        afterResponseTimestamp = datetime.datetime.now()
-        responseTime = afterResponseTimestamp-beforeResponseTimestamp
-        cls.log_to_file(prompt, str(responseTime), succeed=True)
+        # afterResponseTimestamp = datetime.datetime.now()
+        # responseTime = afterResponseTimestamp-beforeResponseTimestamp
+        # cls._log_to_file(prompt, str(responseTime), succeed=True)
 
         # save memory after response
         with open('conv_memory/' + id + '.pickle', 'wb') as handle:
             pickle.dump(mem, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        cls.update_previous_messages(id, prompt, response)
+        cls._update_previous_messages(id, prompt, response)
         return {"answer": response}

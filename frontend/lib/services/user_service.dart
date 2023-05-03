@@ -49,16 +49,32 @@ class UserService {
           message = Message(
               text: jsonData[i]['user'],
               date: DateTime.parse(jsonData[i]['timestamp']),
-              isSentByMe: true
-          );
+              isSentByMe: true);
           result.add(message);
           message = Message(
-            text: jsonData[i]['ai'],
-            date: DateTime.parse(jsonData[i]['timestamp']),
-            isSentByMe: false
-          );
+              text: jsonData[i]['ai'],
+              date: DateTime.parse(jsonData[i]['timestamp']),
+              isSentByMe: false);
           result.add(message);
         }
+        return result;
+      }
+    } catch (error) {
+      return null;
+    }
+  }
+
+  Future<String?> getUserCategory(String prompt) async {
+    try {
+      final response = await http.get(
+          Uri.parse('${dotenv.env['CHAT_API_URL']}/user/categorize?prompt=$prompt'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          });
+      if (response.statusCode != 200) {
+        return null;
+      } else {
+        final result = jsonDecode(response.body);
         return result;
       }
     } catch (error) {
