@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -58,96 +60,44 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _mobileBody() {
-    return Column(children: [
-      Expanded(
-          child: GroupedListView<Message, DateTime>(
-              reverse: true,
-              order: GroupedListOrder.DESC,
-              useStickyGroupSeparators: true,
-              floatingHeader: true,
-              elements: controller.messages!,
-              padding: const EdgeInsets.all(8),
-              groupBy: (message) => DateTime(
-                  message.date.year, message.date.month, message.date.day),
-              groupHeaderBuilder: (Message message) => SizedBox(
-                    height: 40,
-                    child: Center(
-                      child: Card(
-                        color: AppColors.appColorBlue,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Text(DateFormat.yMMMd().format(message.date),
-                              style: const TextStyle(color: Colors.white)),
-                        ),
-                      ),
-                    ),
-                  ),
-              itemBuilder: (context, Message message) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 3.5),
-                    child: BubbleNormal(
-                      text: message.text,
-                      color: message.isSentByMe
-                          ? AppColors.blue
-                          : Colors.grey.shade300,
-                      isSender: message.isSentByMe,
-                      textStyle: TextStyle(
-                          color:
-                              message.isSentByMe ? Colors.white : Colors.black),
-                    ),
-                  ))),
-      Container(
-          color: Colors.grey.shade300,
-          child: MessageBar(
-            sendButtonColor: AppColors.appColorBlue,
-            onSend: (text) async {
-              final message =
-                  Message(text: text, date: DateTime.now(), isSentByMe: true);
-              setState(() {
-                controller.messages!.add(message);
-              });
-              await controller.sendMessage(context, message);
-            },
-            onTextChanged: (p0) async {
-              if (p0.endsWith('\n')) {
-                final message =
-                    Message(text: p0, date: DateTime.now(), isSentByMe: true);
-                setState(() {
-                  controller.messages!.add(message);
-                });
-                await controller.sendMessage(context, message);
-              }
-            },
-          ))
+    return Stack(children: [
+      SingleChildScrollView(
+        child: Column(children: [
+          for (var message in controller.messages!)
+            BubbleNormal(
+              text: message.text,
+              color: message.isSentByMe ? AppColors.blue : Colors.grey.shade300,
+              isSender: message.isSentByMe,
+              textStyle: TextStyle(
+                  color: message.isSentByMe ? Colors.white : Colors.black),
+            ),
+          const SizedBox(height: 70)
+        ]),
+      ),
+      MessageBar(
+        sendButtonColor: AppColors.appColorBlue,
+        onSend: (text) async {
+          final message =
+              Message(text: text, date: DateTime.now(), isSentByMe: true);
+          setState(() {
+            controller.messages!.add(message);
+          });
+          await controller.sendMessage(context, message);
+        },
+      )
     ]);
   }
 
   Widget _desktopBody() {
-    return Column(children: [
-      Expanded(
-          child: GroupedListView<Message, DateTime>(
-              reverse: true,
-              order: GroupedListOrder.DESC,
-              useStickyGroupSeparators: true,
-              floatingHeader: true,
-              elements: controller.messages!,
-              padding: const EdgeInsets.all(8),
-              groupBy: (message) => DateTime(
-                  message.date.year, message.date.month, message.date.day),
-              groupHeaderBuilder: (Message message) => SizedBox(
-                    height: 40,
-                    child: Center(
-                      child: Card(
-                        color: AppColors.appColorBlue,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Text(DateFormat.yMMMd().format(message.date),
-                              style: const TextStyle(color: Colors.white)),
-                        ),
-                      ),
-                    ),
-                  ),
-              itemBuilder: (context, Message message) => BubbleNormal(
-                    text: message.text,
+    return Stack(children: [
+      SingleChildScrollView(
+        child: Column(children: [
+          for (var message in controller.messages!)
+            Row(
+              children: [
+                Expanded(
+                  child: BubbleNormal(
+                    text: utf8.decode(message.text.codeUnits),
                     color: message.isSentByMe
                         ? AppColors.blue
                         : Colors.grey.shade300,
@@ -155,20 +105,37 @@ class _ChatPageState extends State<ChatPage> {
                     textStyle: TextStyle(
                         color:
                             message.isSentByMe ? Colors.white : Colors.black),
-                  ))),
-      Container(
-          color: Colors.grey.shade300,
-          child: MessageBar(
-            sendButtonColor: AppColors.appColorBlue,
-            onSend: (text) async {
-              final message =
-                  Message(text: text, date: DateTime.now(), isSentByMe: true);
-              setState(() {
-                controller.messages!.add(message);
-              });
-              await controller.sendMessage(context, message);
-            },
-          ))
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.thumb_up),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: const Icon(Icons.thumb_down),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: const Icon(Icons.question_mark),
+                  onPressed: () {},
+                ),
+
+                //const SizedBox(width: 30, height: 70)
+              ],
+            ),
+        ]),
+      ),
+      MessageBar(
+        sendButtonColor: AppColors.appColorBlue,
+        onSend: (text) async {
+          final message =
+              Message(text: text, date: DateTime.now(), isSentByMe: true);
+          setState(() {
+            controller.messages!.add(message);
+          });
+          await controller.sendMessage(context, message);
+        },
+      )
     ]);
   }
 }
@@ -181,6 +148,9 @@ class ChatController extends GetxController {
 
   loadMessages() async {
     messages = await userService.getPreviousMessagesByUserId(id);
+    for (var m in messages!) {
+      //print(m.text);
+    }
     update();
   }
 
@@ -199,7 +169,6 @@ class ChatController extends GetxController {
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
-
     update();
   }
 }
