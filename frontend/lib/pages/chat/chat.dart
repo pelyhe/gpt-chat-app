@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:project/entities/message.dart';
+import 'package:project/general/fonts.dart';
 import 'package:project/general/themes.dart';
 import 'package:project/general/utils.dart';
 import 'package:intl/intl.dart';
@@ -89,8 +90,9 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _desktopBody() {
-    return Stack(children: [
-      SingleChildScrollView(
+    return Column(children: [
+     Expanded(
+      child: SingleChildScrollView(
         child: Column(children: [
           for (var message in controller.messages!)
             Row(
@@ -125,17 +127,27 @@ class _ChatPageState extends State<ChatPage> {
             ),
         ]),
       ),
-      MessageBar(
-        sendButtonColor: AppColors.appColorBlue,
-        onSend: (text) async {
-          final message =
-              Message(text: text, date: DateTime.now(), isSentByMe: true);
-          setState(() {
-            controller.messages!.add(message);
-          });
-          await controller.sendMessage(context, message);
-        },
-      )
+      ),
+      Align(
+              child: Column(
+                children: [
+                  ElevatedButton(
+                      onPressed: () => controller.getUserCategory(context),
+                      child: const Text("What type of collector am I?")),
+                  MessageBar(
+                    sendButtonColor: AppColors.appColorBlue,
+                    onSend: (text) async {
+                      final message =
+                          Message(text: text, date: DateTime.now(), isSentByMe: true);
+                      setState(() {
+                        controller.messages!.add(message);
+                      });
+                      await controller.sendMessage(context, message);
+                    },
+                  ),
+                ],
+              )
+           )
     ]);
   }
 }
@@ -170,5 +182,50 @@ class ChatController extends GetxController {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
     update();
+  }
+
+  Future<void> getUserCategory(BuildContext context) async {
+    String text = "";
+    String prompt = "";
+    if (messages!.isEmpty) {
+      text =
+          "Cannot determine the collector's category without previous messages.";
+    } else if (messages!.length < 5) {
+      List<String> myMessages = [];
+      for (var m in messages!) {
+        if (m.isSentByMe) {
+          myMessages.add(m.text);
+        }
+      }
+      prompt = myMessages.join(" | ");
+    } else {
+      List<String> myMessages = [];
+      for (var m in messages!) {
+        if (m.isSentByMe) {
+          myMessages.add(m.text);
+        }
+      }
+      final lastMessages = myMessages.sublist(myMessages.length - 5);
+      prompt = lastMessages.join(" | ");
+    }
+
+    final result = await userService.getUserCategory(prompt);
+
+    if (result!.toLowerCase().contains("investor")) {
+      text = "You are an investor!";
+    } else if (result.toLowerCase().contains("impulsive")) {
+      text = "You are an impulsive collector!";
+    } else if (result.toLowerCase().contains("thematic")) {
+      text = "You are a thematic collector!";
+    } else if (result.toLowerCase().contains("lover")) {
+      text = "You are an art lover!";
+    }
+
+    final snackBar = SnackBar(
+      content:
+          Text(text, style: const TextStyle(fontSize: 20)),
+      backgroundColor: Colors.green,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

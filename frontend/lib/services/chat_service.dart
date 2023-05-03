@@ -10,6 +10,7 @@ class ChatService {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         });
+        
     if (response.statusCode != 200) {
       return null;
     } else {

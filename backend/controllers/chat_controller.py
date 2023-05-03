@@ -1,122 +1,86 @@
 import logging
-LOG_FILE_PATH = 'config/requests.log'
+import pickle
+from langchain import LLMChain
+LOG_FILE_PATH = 'config/log.log'
 logging.basicConfig(filename=LOG_FILE_PATH, filemode='a', level=logging.CRITICAL,
                     format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
 import datetime
 import os
-import pickle
 from bson import ObjectId
 from fastapi import HTTPException
-from gpt_index import SimpleDirectoryReader
-from langchain import OpenAI
-from llama_index import ComposableGraph, GPTListIndex, GPTSimpleVectorIndex, LLMPredictor, ServiceContext
+from langchain.llms import OpenAI
+from langchain.vectorstores import FAISS
+from langchain.embeddings.openai import OpenAIEmbeddings
 from pydantic import BaseModel
-from llama_index.indices.query.query_transform.base import DecomposeQueryTransform
-from llama_index.langchain_helpers.agents import LlamaToolkit, create_llama_chat_agent, IndexToolConfig, GraphToolConfig
 from config.db import get_db
+from langchain.agents import AgentExecutor, Tool, ZeroShotAgent
+from langchain.document_loaders import DirectoryLoader
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationalRetrievalChain, RetrievalQA
+from langchain.agents import load_tools
 
 os.environ['OPENAI_API_KEY'] = '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'
-DOCUMENTS_DIRECTORY = 'data'
+# os.environ['GOOGLE_API_KEY'] = 'AIzaSyDIJRQfV4SGsCfiqZqcyIRoEo2PZcL22vs'
+# os.environ['GOOGLE_CSE_ID'] = '81890bc0c20ea4b7f'
+DOCUMENTS_DIRECTORY = 'data/gallery/'
 
 db = get_db()
 userModel = db['users']
 
+## THE MODEL, WHICH CAN USE GOOGLE TOOL
 
 class ChatController(BaseModel):
 
     def create_chat_agent(memory):
+        llm = OpenAI(temperature=0, model_name="gpt-3.5-turbo")
+        
+        # Data Ingestion
+        word_loader = DirectoryLoader(DOCUMENTS_DIRECTORY, glob="*.docx")
+        documents = []
+        documents.extend(word_loader.load())
+        # Chunk and Embeddings
+        text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+        documents = text_splitter.split_documents(documents)
+        embeddings = OpenAIEmbeddings()
+        vectorstore = FAISS.from_documents(documents, embeddings)
 
-        doc_set = {}
-        all_docs = []
-        # loop through files / filenames (file storing api?) in db
-        for filename in os.listdir(DOCUMENTS_DIRECTORY):
-            f = DOCUMENTS_DIRECTORY+'/'+filename
-            document = SimpleDirectoryReader(input_files=[f]).load_data()
-            # filename is the key, document itself is the value
-            doc_set[filename] = document
-            all_docs.extend(document)
+        # Initialise Langchain - QA chain
+        qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=vectorstore.as_retriever())
+        
+        #google_search_tool = load_tools(["google-search"])[0]
 
-        # initialize simple vector indices + global vector index
-        service_context = ServiceContext.from_defaults(chunk_size_limit=512)
-        index_set = {}
-        for filename in os.listdir(DOCUMENTS_DIRECTORY):
-            curr_index = GPTSimpleVectorIndex.from_documents(
-                doc_set[filename], service_context=service_context)
-            index_set[filename] = curr_index
-            # curr_index.save_to_disk(f'index_{filename}.json')
-
-        llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, max_tokens=512))
-        service_context = ServiceContext.from_defaults(
-            llm_predictor=llm_predictor)
-
-        # define a list index over the vector indices
-        # allows us to synthesize information across each index
-        graph = ComposableGraph.from_indices(
-            GPTListIndex,
-            [index_set[f] for f in os.listdir(DOCUMENTS_DIRECTORY)],
-            index_summaries=[
-                "Some information about an artist" for x in index_set],
-            service_context=service_context
-        )
-
-        decompose_transform = DecomposeQueryTransform(
-            llm_predictor, verbose=True
-        )
-
-        # define query configs for graph
-        query_configs = [
-            {
-                "index_struct_type": "simple_dict",
-                "query_mode": "default",
-                "query_kwargs": {
-                    "similarity_top_k": 1,
-                    # "include_summary": True
-                },
-                "query_transform": decompose_transform
-            },
-            {
-                "index_struct_type": "list",
-                "query_mode": "default",
-                "query_kwargs": {
-                    "response_mode": "tree_summarize",
-                    "verbose": True
-                }
-            }
+        tools = [
+            Tool(
+                name="Glassyard gallery exhibition",
+                func=qa.run,
+                description="useful for when you need to answer questions about the gallery, the exhibition, art world, or people related to art."
+            ),
+            #google_search_tool
         ]
 
-        # graph config
-        graph_config = GraphToolConfig(
-            graph=graph,
-            name=f"Graph Index",
-            description="useful for when user asks about art",
-            query_configs=query_configs,
-            tool_kwargs={"return_direct": True}
+        prefix = """Have a conversation with a human, answering the following questions as best you can based on your language model and the context and memory available.
+                    You have access to a single tool."""
+
+
+        suffix = """Begin!
+        
+        {chat_history}
+        Question: {input}
+        {agent_scratchpad}"""
+
+        prompt = ZeroShotAgent.create_prompt(
+            tools=tools,
+            prefix=prefix,
+            suffix=suffix,
+            input_variables=["input", "chat_history", "agent_scratchpad"]
         )
 
-        # define toolkit
-        index_configs = []
-        for filename in os.listdir(DOCUMENTS_DIRECTORY):
-            tool_config = IndexToolConfig(
-                index=index_set[filename],
-                name=f"Vector Index {filename}",
-                description=f"useful for when the user ask about art or artists",
-                index_query_kwargs={"similarity_top_k": 3},
-                tool_kwargs={"return_direct": True}
-            )
-            index_configs.append(tool_config)
+        llm_chain = LLMChain(llm=llm, prompt=prompt)
 
-        toolkit = LlamaToolkit(
-            index_configs=index_configs,
-            graph_configs=[graph_config]
-        )
-
-        llm = OpenAI(temperature=0)
-
-        return create_llama_chat_agent(
-            toolkit,
-            llm,
-            memory=memory,
-            verbose=True
+        agent = ZeroShotAgent(llm_chain=llm_chain, tools=tools, verbose=True)
+        return AgentExecutor.from_agent_and_tools(
+            agent=agent, tools=tools, verbose=True, memory=memory
         )
 
     def update_previous_messages(userId: str, prompt: str, response: str):
@@ -135,37 +99,46 @@ class ChatController(BaseModel):
         else:
             logging.critical('ERROR: ' + errorMessage)
 
+
     @classmethod
     def askAI(cls, prompt: str, id: str):
         try:
             objId = ObjectId(id)
         except:
+            cls.log_to_file(prompt=prompt, responseTime=0, succeed=False, errorMessage="Not valid id")
             raise HTTPException(status_code=400, detail="Not valid id.")
 
-        # load the memory according to the user id
-        with open('conv_memory/'+id+'.pickle', 'rb') as handle:
-            mem = pickle.load(handle)
-        agent_executor = cls.create_chat_agent(mem)
+        if not os.path.isfile('conv_memory/'+id+'.pickle'):
+            mem = ConversationBufferMemory(memory_key="chat_history")
+            with open('conv_memory/' + id + '.pickle', 'wb') as handle:
+                pickle.dump(mem, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            # load the memory according to the user id
+            with open('conv_memory/'+id+'.pickle', 'rb') as handle:
+                mem = pickle.load(handle)
 
-        beforeResponseTimestamp = datetime.datetime.now()
+        qa = cls.create_chat_agent(memory=mem)
+        print(qa)
+        before_time = datetime.datetime.now()
         # for could not parse LLM output
         try:
-            response = agent_executor.run(input=prompt)
+            response = qa.run(input=prompt)
         except ValueError as e:
             response = str(e)
             if not response.startswith("Could not parse LLM output: `"):
-                cls.log_to_file(prompt, responseTime, succeed=False, errorMessage=str(e))
+                cls.log_to_file(prompt, "", succeed=False, errorMessage=str(e))
                 raise e
             response = response.removeprefix(
                 "Could not parse LLM output: `").removesuffix("`")
+        after_time = datetime.datetime.now()
+        
+        response_time = str(after_time - before_time)
 
-        afterResponseTimestamp = datetime.datetime.now()
-        responseTime = afterResponseTimestamp-beforeResponseTimestamp
-        cls.log_to_file(prompt, str(responseTime), succeed=True)
-
+        cls.log_to_file(prompt=prompt, responseTime=response_time, succeed=True)
         # save memory after response
         with open('conv_memory/' + id + '.pickle', 'wb') as handle:
             pickle.dump(mem, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        cls.update_previous_messages(userId=id, prompt=prompt, response=response)
 
-        cls.update_previous_messages(id, prompt, response)
-        return {"answer": response}
+        return response
+
