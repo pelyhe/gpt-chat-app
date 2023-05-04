@@ -6,7 +6,8 @@ import '../../general/fonts.dart';
 import '../../general/themes.dart';
 
 class FeedbackPopup extends StatefulWidget {
-  const FeedbackPopup({Key? key}) : super(key: key);
+  String? type;
+  FeedbackPopup({Key? key, required this.type}) : super(key: key);
 
   @override
   State<FeedbackPopup> createState() => _FeedbackPopupState();
@@ -14,86 +15,41 @@ class FeedbackPopup extends StatefulWidget {
 
 class _FeedbackPopupState extends State<FeedbackPopup> {
   final controller = Get.put(FeedbackPopupController());
-
+  String? type;
   @override
   Widget build(BuildContext context) {
     ScreenSize.refresh(context);
+    type = widget.type;
     return Dialog(
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0)), //this right here
       child: SizedBox(
-        height: ScreenSize.height * 0.7 > 400 ? 400 : ScreenSize.height * 0.7,
-        width: ScreenSize.width * 0.7 > 700 ? 700 : ScreenSize.width * 0.7,
-        child: Row(
+        height: ScreenSize.height * 0.15,
+        width: ScreenSize.width * 0.5,
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Expanded(
-              child: InkWell(
-                  onHover: (isHovering) {
-                    if (isHovering) {
-                      setState(() {
-                        controller.isCustomerHovering = true;
-                      });
-                    } else {
-                      setState(() {
-                        controller.isCustomerHovering = false;
-                      });
-                    }
-                  },
-                  onTap: () =>
-                      Navigator.pushNamed(context, '/register/customer'),
-                  child: SizedBox.expand(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                          color: controller.isCustomerHovering
-                              ? AppColors.kPrimaryColor
-                              : AppColors.kPrimaryColor.withAlpha(400)),
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: AppText("Register as customer",
-                              style: GoogleFonts.mavenPro(
-                                  fontSize: 30, color: Colors.black),
-                              maxlines: 3),
-                        ),
-                      ),
-                    ),
-                  )),
-            ),
-            Expanded(
-                child: InkWell(
-              onHover: (isHovering) {
-                if (isHovering) {
-                  setState(() {
-                    controller.isGalleryHovering = true;
-                  });
-                } else {
-                  setState(() {
-                    controller.isGalleryHovering = false;
-                  });
-                }
-              },
-              onTap: () => Navigator.pushNamed(context, '/register/gallery'),
-              child: SizedBox.expand(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      color: controller.isGalleryHovering
-                          ? AppColors.kPrimaryColor
-                          : AppColors.kPrimaryColor.withAlpha(400)),
-                  child: Center(
-                      child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: AppText("Register as gallery",
-                        style: GoogleFonts.mavenPro(
-                            fontSize: 30,
-                            color: controller.isGalleryHovering
-                                ? Colors.white
-                                : Colors.black),
-                        maxlines: 3),
-                  )),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: ScreenSize.isMobile ? 5 : 10, vertical: 10),
+              child: const TextField(
+                //controller: countryField,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Feedback',
                 ),
               ),
-            )),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: ScreenSize.isMobile ? 5 : 10, vertical: 10),
+              child: ElevatedButton(
+                onPressed: () {
+                  print('Type: ' + type! + 'Feedback saved');
+                },
+                child: Text("Sumbit".toUpperCase()),
+              ),
+            ),
           ],
         ),
       ),
@@ -102,6 +58,5 @@ class _FeedbackPopupState extends State<FeedbackPopup> {
 }
 
 class FeedbackPopupController extends GetxController {
-  bool isCustomerHovering = false;
-  bool isGalleryHovering = false;
+  sendFeedback() {}
 }

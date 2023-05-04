@@ -115,23 +115,29 @@ class _ChatPageState extends State<ChatPage> {
                     IconButton(
                       icon: const Icon(Icons.thumb_up),
                       onPressed: () => {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext ctx) => FeedbackPopup())
-                  },
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext ctx) => FeedbackPopup(type: 'good'))
+                      },
                     ),
                   if (message.isSentByMe == false)
                     IconButton(
                       icon: const Icon(Icons.thumb_down),
-                      onPressed: () {},
+                      onPressed: () => {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext ctx) => FeedbackPopup(type: 'bad'))
+                      },
                     ),
                   if (message.isSentByMe == false)
                     IconButton(
                       icon: const Icon(Icons.question_mark),
-                      onPressed: () {},
+                      onPressed: () => {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext ctx) => FeedbackPopup(type: '?'))
+                      },
                     ),
-
-                  //const SizedBox(width: 30, height: 70)
                 ],
               ),
           ]),
