@@ -95,6 +95,15 @@ class _ChatPageState extends State<ChatPage> {
             for (var message in controller.messages!)
               Row(
                 children: [
+                  if (message.isSentByMe == false)
+                    IconButton(
+                      icon: const Icon(Icons.feedback),
+                      onPressed: () => {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext ctx) => FeedbackPopup(message: message))
+                      },
+                    ),
                   Expanded(
                     child: BubbleNormal(
                       text: utf8.decode(message.text.codeUnits),
@@ -107,33 +116,6 @@ class _ChatPageState extends State<ChatPage> {
                               message.isSentByMe ? Colors.white : Colors.black),
                     ),
                   ),
-                  if (message.isSentByMe == false)
-                    IconButton(
-                      icon: const Icon(Icons.thumb_up),
-                      onPressed: () => {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext ctx) => FeedbackPopup(type: 'good'))
-                      },
-                    ),
-                  if (message.isSentByMe == false)
-                    IconButton(
-                      icon: const Icon(Icons.thumb_down),
-                      onPressed: () => {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext ctx) => FeedbackPopup(type: 'bad'))
-                      },
-                    ),
-                  if (message.isSentByMe == false)
-                    IconButton(
-                      icon: const Icon(Icons.question_mark),
-                      onPressed: () => {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext ctx) => FeedbackPopup(type: '?'))
-                      },
-                    ),
                 ],
               ),
           ]),

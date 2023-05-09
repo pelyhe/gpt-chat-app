@@ -7,10 +7,11 @@ feedbackModel = db['feedbacks']
 
 class FeedbackController(BaseModel):
         
-    def upload(type: str, feedback: str):
+    def upload(ai: str, feedback: str, opinion: str, date: str):
         feedback_data = {
-            '_id': ObjectId(id),
-            'type': type,
-            'feedback': feedback
+            'ai': ai,
+            'feedback': feedback,
+            'opinion': opinion,
+            'date': date
         }
         feedbackModel.insert_one(feedback_data)

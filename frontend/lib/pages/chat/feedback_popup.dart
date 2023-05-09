@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../entities/message.dart';
+import '../../entities/fb.dart';
 import '../../general/fonts.dart';
 import '../../services/feedback_service.dart';
 
 class FeedbackPopup extends StatefulWidget {
-  String? type;
-  FeedbackPopup({Key? key, required this.type}) : super(key: key);
+  Message? message;
+  FeedbackPopup({Key? key, required this.message}) : super(key: key);
 
   @override
   State<FeedbackPopup> createState() => _FeedbackPopupState();
@@ -14,12 +16,13 @@ class FeedbackPopup extends StatefulWidget {
 class _FeedbackPopupState extends State<FeedbackPopup> {
   TextEditingController feedbackField = TextEditingController();
   final controller = Get.put(FeedbackPopupController());
-  String? type;
+  List<String> checkedItems = [];
+  Message? message;
 
   @override
   Widget build(BuildContext context) {
     ScreenSize.refresh(context);
-    type = widget.type;
+    message = widget.message;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: SizedBox(
@@ -35,26 +38,29 @@ class _FeedbackPopupState extends State<FeedbackPopup> {
                 controller: feedbackField,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  hintText: 'Feedback',
+                  hintText: 'Provide Feedback',
                 ),
               ),
             ),
             Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: ScreenSize.isMobile ? 5 : 10, vertical: 10),
-              child: 
-              checkboxes(),
+              child: checkboxes(),
             ),
             Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: ScreenSize.isMobile ? 5 : 10, vertical: 10),
               child: ElevatedButton(
                 onPressed: () {
+                  controller.feedback = Fb(text: message!.text, feedback: feedbackField.text, opinion: checkedItems, date: message!.date);
+                  controller.sendFeedback();
                   //controller.feedbackService.upload(type!, feedbackField.text);
-                  print('Type: ' + type! + 'Feedback saved');
-                  print(controller.type?.toSet().toString());
+                  //print('Message: ' + controller.feedback!.text+'\n'
+                  //+ controller.feedback!.feedback +'\n'
+                  //+ controller.feedback!.opinion.toString() +'\n'
+                  //+controller.feedback!.date.toString() +'\n'+ 'Feedback saved');
                 },
-                child: Text("Sumbit".toUpperCase()),
+                child: Text("Submit".toUpperCase()),
               ),
             ),
           ],
@@ -63,40 +69,41 @@ class _FeedbackPopupState extends State<FeedbackPopup> {
     );
   }
 
-  Row checkboxes(){
-    return Row(
-      children: [
-        checkbox('Relevant', true),
-        checkbox('Irrelevant', false),
-        checkbox('Repetitive', false),
-        checkbox('Out of context', false),
-        checkbox('convincing', false),
-        checkbox('Intresting', false),
-      ]);
+  Row checkboxes() {
+    return Row(children: [
+      checkbox('Relevant', true),
+      checkbox('Irrelevant', false),
+      checkbox('Repetitive', false),
+      checkbox('Out of context', false),
+      checkbox('convincing', false),
+      checkbox('Intresting', false),
+    ]);
   }
-  Expanded checkbox(String title, bool leading){
+
+  Expanded checkbox(String title, bool leading) {
     return Expanded(
       child: CheckboxListTile(
-      title: Text(title),
-      value: controller.checkedValue,
-      onChanged: (newValue) {
-        setState(() {
-          controller.checkedValue = newValue!;
-          controller.setType(title);
-        });
-      },
-      controlAffinity: leading ? ListTileControlAffinity.leading : ListTileControlAffinity.trailing, 
-      ),
+          title: Text(title),
+          value: checkedItems.contains(title),
+          onChanged: (bool? value) {
+            setState(() {
+              if (value == true) {
+                checkedItems.add(title);
+              } else {
+                checkedItems.remove(title);
+              }
+            });
+          },
+        ),
+
     );
   }
 }
-//every box is selected when one is
+
 class FeedbackPopupController extends GetxController {
   final feedbackService = FeedbackService();
-  bool checkedValue = false;
-  List<String>? type = [];
-  setType(String t){
-    type?.add(t);
+  Fb? feedback;
+  sendFeedback(){
+    feedbackService.upload(feedback!);
   }
-  sendFeedback() {}
 }
