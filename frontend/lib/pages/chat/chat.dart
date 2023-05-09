@@ -1,14 +1,11 @@
 import 'dart:convert';
-
-import 'package:chat_bubbles/chat_bubbles.dart';
+import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:grouped_list/grouped_list.dart';
 import 'package:project/entities/message.dart';
 import 'package:project/general/fonts.dart';
 import 'package:project/general/themes.dart';
 import 'package:project/general/utils.dart';
-import 'package:intl/intl.dart';
 import 'package:project/pages/loading.dart';
 import 'package:project/services/chat_service.dart';
 import 'package:project/services/user_service.dart';
@@ -34,6 +31,7 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    ScreenSize.refresh(context);
     return FutureBuilder(
         future: loadMessages,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -45,13 +43,15 @@ class _ChatPageState extends State<ChatPage> {
                 builder: (controller) {
                   return Scaffold(
                     appBar: AppBar(
-                      title: const Text('GPT Chat'),
-                      backgroundColor: AppColors.appColorBlue.withOpacity(0.9),
+                      automaticallyImplyLeading: true,
+                      title: const Text(
+                          "Hello Chat GPT (Beta) powered by Walter's Cube"),
+                      backgroundColor: AppColors.appBarColor.withOpacity(0.9),
                     ),
                     body: scaffoldBody(
                       context: context,
                       mobileBody: _mobileBody(),
-                      tabletBody: _mobileBody(),
+                      tabletBody: _tabletBody(),
                       desktopBody: _desktopBody(),
                     ),
                   );
@@ -61,93 +61,179 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _mobileBody() {
-    return Stack(children: [
-      SingleChildScrollView(
-        child: Column(children: [
-          for (var message in controller.messages!)
-            BubbleNormal(
-              text: message.text,
-              color: message.isSentByMe ? AppColors.blue : Colors.grey.shade300,
-              isSender: message.isSentByMe,
-              textStyle: TextStyle(
-                  color: message.isSentByMe ? Colors.white : Colors.black),
-            ),
-          const SizedBox(height: 70)
-        ]),
-      ),
-      MessageBar(
-        sendButtonColor: AppColors.appColorBlue,
-        onSend: (text) async {
-          final message =
-              Message(text: text, date: DateTime.now(), isSentByMe: true);
-          setState(() {
-            controller.messages!.add(message);
-          });
-          await controller.sendMessage(context, message);
-        },
-      )
-    ]);
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: ScreenSize.width * 0.05),
+      child: _createBody()
+    );
+  }
+
+  Widget _tabletBody() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: ScreenSize.width * 0.15),
+      child: _createBody()
+    );
   }
 
   Widget _desktopBody() {
-    return Column(children: [
-      Expanded(
-        child: SingleChildScrollView(
-          child: Column(children: [
-            for (var message in controller.messages!)
-              Row(
-                children: [
-                  Expanded(
-                    child: BubbleNormal(
-                      text: utf8.decode(message.text.codeUnits),
-                      color: message.isSentByMe
-                          ? AppColors.blue
-                          : Colors.grey.shade300,
-                      isSender: message.isSentByMe,
-                      textStyle: TextStyle(
-                          color:
-                              message.isSentByMe ? Colors.white : Colors.black),
-                    ),
-                  ),
-                  // IconButton(
-                  //   icon: const Icon(Icons.thumb_up),
-                  //   onPressed: () {},
-                  // ),
-                  // IconButton(
-                  //   icon: const Icon(Icons.thumb_down),
-                  //   onPressed: () {},
-                  // ),
-                  // IconButton(
-                  //   icon: const Icon(Icons.question_mark),
-                  //   onPressed: () {},
-                  // ),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: ScreenSize.width * 0.27),
+      child: _createBody()
+    );
+  }
 
-                  //const SizedBox(width: 30, height: 70)
+  Widget _createBody() {
+    return Column(children: [
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(children: [
+              for (var message in controller.messages!)
+                message.isSentByMe
+                    ? _createSentChatBubble(message.text)
+                    : _createRecievedChatBubble(message.text),
+            ]),
+          ),
+        ),
+        Align(
+            child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.all(AppColors.appBarColor)),
+                  onPressed: () => controller.getUserCategory(context),
+                  child: const Text("What type of collector am I?")),
+            ),
+            _createMessageBar(),
+          ],
+        ))
+      ]);
+  }
+
+  Widget _createSentChatBubble(String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: ChatBubble(
+            clipper: ChatBubbleClipper1(type: BubbleType.sendBubble),
+            alignment: Alignment.topRight,
+            margin: const EdgeInsets.only(top: 20),
+            backGroundColor: Colors.yellow[200],
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.7,
+              ),
+              child: Text(
+                text,
+                style: const TextStyle(color: Colors.black),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: createAvatarFromName(18.0, 'User', 0),
+        ),
+      ],
+    );
+  }
+
+  Widget _createRecievedChatBubble(String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: createAvatarFromName(18.0, 'Artificial Intelligence', 0),
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        Expanded(
+          child: ChatBubble(
+            clipper: ChatBubbleClipper1(type: BubbleType.receiverBubble),
+            backGroundColor: Colors.grey[300],
+            margin: const EdgeInsets.only(top: 20),
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.7,
+              ),
+              child: Text(
+                text,
+                style: const TextStyle(color: Colors.black),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _createMessageBar() {
+    return Container(
+      height: 45,
+      width: MediaQuery.of(context).size.width,
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                  controller: controller._textFieldController,
+                  decoration: InputDecoration(
+                    fillColor: Colors.grey[300],
+                    hintText: "Type your message here...",
+                    hintStyle: const TextStyle(color: Colors.black),
+                  ),
+                  onSubmitted: (value) async {
+                    final message = Message(
+                        text: value, date: DateTime.now(), isSentByMe: true);
+                    controller._textFieldController.clear();
+                    setState(() {
+                      controller.messages!.add(message);
+                    });
+                    await controller.sendMessage(context, message);
+                  }),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            MaterialButton(
+              color: AppColors.appBarColor,
+              onPressed: () async {
+                final message = Message(
+                    text: controller._textFieldController.text,
+                    date: DateTime.now(),
+                    isSentByMe: true);
+                controller._textFieldController.clear();
+                setState(() {
+                  controller.messages!.add(message);
+                });
+                await controller.sendMessage(context, message);
+              },
+              child: Row(
+                children: const [
+                  Text("Send now", style: TextStyle(color: Colors.white)),
+                  SizedBox(width: 10),
+                  Icon(
+                    Icons.send,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                 ],
               ),
-          ]),
+              elevation: 0,
+            ),
+          ],
         ),
       ),
-      Align(
-          child: Column(
-        children: [
-          ElevatedButton(
-              onPressed: () => controller.getUserCategory(context),
-              child: const Text("What type of collector am I?")),
-          MessageBar(
-            sendButtonColor: AppColors.appColorBlue,
-            onSend: (text) async {
-              final message =
-                  Message(text: text, date: DateTime.now(), isSentByMe: true);
-              setState(() {
-                controller.messages!.add(message);
-              });
-              await controller.sendMessage(context, message);
-            },
-          ),
-        ],
-      ))
-    ]);
+    );
   }
 }
 
@@ -156,12 +242,10 @@ class ChatController extends GetxController {
   UserService userService = UserService();
   late String id;
   List<Message>? messages = [];
+  final _textFieldController = TextEditingController();
 
   loadMessages() async {
     messages = await userService.getPreviousMessagesByUserId(id);
-    for (var m in messages!) {
-      //print(m.text);
-    }
     update();
   }
 
@@ -196,7 +280,7 @@ class ChatController extends GetxController {
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       return;
-    } else if (messages!.length < 5) {
+    } else if (messages!.length < 11) {
       List<String> myMessages = [];
       for (var m in messages!) {
         if (m.isSentByMe) {

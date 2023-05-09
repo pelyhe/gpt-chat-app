@@ -14,7 +14,7 @@ class ChatService {
     if (response.statusCode != 200) {
       return null;
     } else {
-      return jsonDecode(response.body)['answer'];
+      return jsonDecode(response.body)['answer'].replaceAll("\n", "");;
     }
   }
 }

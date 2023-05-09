@@ -26,7 +26,7 @@ createAvatarFromName(double radius, String name, int notifications) {
     width: radius * 2,
     child: Stack(alignment: Alignment.bottomLeft, children: [
       Avatar(
-          placeholderColors: [AppColors.kPrimaryColor],
+          placeholderColors: [AppColors.appBarColor],
           name: name,
           shape: AvatarShape.circle(radius)),
       if (notifications != 0)
@@ -57,3 +57,4 @@ createAvatarFromName(double radius, String name, int notifications) {
     ]),
   );
 }
+

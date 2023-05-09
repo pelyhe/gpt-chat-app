@@ -1,3 +1,4 @@
+import csv
 import logging
 from pathlib import Path
 from controllers.user_controller import UserController
@@ -34,11 +35,16 @@ class ChatController(BaseModel):
         all_docs = []
 
         DocxReader = download_loader("DocxReader")
+        CSVReader = download_loader("SimpleCSVReader")
         loader = DocxReader()
+        csv_loader = CSVReader()
         # loop through files / filenames (file storing api?) in db
         for filename in os.listdir(DOCUMENTS_DIRECTORY):
             f = DOCUMENTS_DIRECTORY+'/'+filename
-            document = loader.load_data(file=Path(f))
+            if f.endswith('docx'):
+                document = loader.load_data(file=Path(f))
+            else:
+                document = csv_loader.load_data(file=Path(f))
             # filename is the key, document itself is the value
             doc_set[filename] = document
             all_docs.extend(document)
@@ -58,7 +64,7 @@ class ChatController(BaseModel):
         #     curr_index = GPTSimpleVectorIndex.load_from_disk(f'indices/index_{filename}.json')
         #     index_set[filename] = curr_index
 
-        llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-3.5-turbo", max_tokens=1000))
+        llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-4", max_tokens=1000))
         service_context = ServiceContext.from_defaults(
             llm_predictor=llm_predictor)
 
@@ -120,32 +126,33 @@ class ChatController(BaseModel):
                 index_query_kwargs={"similarity_top_k": 3},
                 tool_kwargs={"return_direct": True}
         )
-        # user_catagory_config = IndexToolConfig(
-        #     index=index_set['user_categorize.docx'],
-        #         name=f"User index",
-        #         description=f"useful for when you need to answer the question: What user category do I belong to?",
-        #         index_query_kwargs={"similarity_top_k": 3},
-        #         tool_kwargs={"return_direct": True}
-        # )
-        # TODO: for policies!
-        # facts_config = IndexToolConfig(
-        #     index=index_set['policy.docx'],
-        #         name=f"Vector Index User",
-        #         description=f"contraints for recommending auctions, galleries or other sources of artworks",
-        #         index_query_kwargs={"similarity_top_k": 3},
-        #         tool_kwargs={"return_direct": True}
-        # )
+
+        artwork_data_config = IndexToolConfig(
+            index=index_set['artworks-data.csv'],
+                name=f"Artwork data index",
+                description=f"useful for when you need to answer basic questions about the details of an artwork, like size, price, date of creation, creation technique. Never tell the id of an artwork.",
+                index_query_kwargs={"similarity_top_k": 3},
+                tool_kwargs={"return_direct": True}
+        )
+
+        policy_config = IndexToolConfig(
+            index=index_set['policy.docx'],
+                name=f"Vector Index User",
+                description=f"contraints for recommending auctions, galleries or other sources of artworks",
+                index_query_kwargs={"similarity_top_k": 3},
+                tool_kwargs={"return_direct": True}
+        )
 
         index_configs.append(gallery_config)
-        # index_configs.append(user_catagory_config)
-        # index_configs.append(facts_config)
+        index_configs.append(artwork_data_config)
+        index_configs.append(policy_config)
 
         toolkit = LlamaToolkit(
             index_configs=index_configs,
             graph_configs=[graph_config]
         )
 
-        llm = OpenAI(temperature=0, model_name="gpt-3.5-turbo")
+        llm = OpenAI(temperature=0, model_name="gpt-4")
 
         return create_llama_chat_agent(
             toolkit,
