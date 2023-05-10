@@ -53,9 +53,10 @@ class _FeedbackPopupState extends State<FeedbackPopup> {
               padding: EdgeInsets.symmetric(
                   horizontal: ScreenSize.isMobile ? 5 : 10, vertical: 10),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   controller.feedback = Fb(text: message!.text, feedback: feedbackField.text, opinion: checkedItems, date: message!.date);
-                  controller.sendFeedback();
+                  await controller.sendFeedback();
+                  Navigator.pop(context);
                   //controller.feedbackService.upload(type!, feedbackField.text);
                   //print('Message: ' + controller.feedback!.text+'\n'
                   //+ controller.feedback!.feedback +'\n'
@@ -105,7 +106,7 @@ class _FeedbackPopupState extends State<FeedbackPopup> {
 class FeedbackPopupController extends GetxController {
   final feedbackService = FeedbackService();
   Fb? feedback;
-  sendFeedback(){
-    feedbackService.upload(feedback!);
+  Future<void> sendFeedback() async {
+    await feedbackService.upload(feedback!);
   }
 }
