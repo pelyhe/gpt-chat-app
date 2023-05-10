@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -19,3 +20,30 @@ class AppFonts {
 }
 
 class AppTimeFormats {}
+
+// ignore: non_constant_identifier_names
+Widget AppText(String text,
+    {Color? color,
+    double fontSize = 15,
+    double? spacing,
+    FontWeight? weight = FontWeight.normal,
+    int? maxlines = 1,
+    double minFontSize = 10,
+    double stepGranularity = 1,
+    TextAlign textAlign = TextAlign.start,
+    TextOverflow overflow = TextOverflow.ellipsis,
+    TextStyle? style}) {
+  return AutoSizeText(
+    text,
+    style: style ??
+        GoogleFonts.mavenPro(
+            color: color,
+            letterSpacing: spacing,
+            fontWeight: weight,
+            fontSize: fontSize),
+    textAlign: textAlign,
+    minFontSize: minFontSize,
+    stepGranularity: stepGranularity,
+    maxLines: maxlines,
+  );
+}

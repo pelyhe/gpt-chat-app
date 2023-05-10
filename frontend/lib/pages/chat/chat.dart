@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,6 +9,7 @@ import 'package:project/general/utils.dart';
 import 'package:project/pages/loading.dart';
 import 'package:project/services/chat_service.dart';
 import 'package:project/services/user_service.dart';
+import 'feedback_popup.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({Key? key}) : super(key: key);
@@ -63,78 +63,75 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _mobileBody() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: ScreenSize.width * 0.05),
-      child: _createBody()
-    );
+        margin: EdgeInsets.symmetric(horizontal: ScreenSize.width * 0.05),
+        child: _createBody());
   }
 
   Widget _tabletBody() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: ScreenSize.width * 0.15),
-      child: _createBody()
-    );
+        margin: EdgeInsets.symmetric(horizontal: ScreenSize.width * 0.15),
+        child: _createBody());
   }
 
   Widget _desktopBody() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: ScreenSize.width * 0.27),
-      child: _createBody()
-    );
+        margin: EdgeInsets.symmetric(horizontal: ScreenSize.width * 0.27),
+        child: _createBody());
   }
 
   Widget _createBody() {
     return Column(children: [
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(children: [
-              for (var message in controller.messages!)
-                message.isSentByMe
-                    ? _createSentChatBubble(message.text)
-                    : _createRecievedChatBubble(message.text),
-            ]),
-          ),
+      Expanded(
+        child: SingleChildScrollView(
+          child: Column(children: [
+            for (var message in controller.messages!)
+              message.isSentByMe
+                  ? _createSentChatBubble(message)
+                  : _createRecievedChatBubble(message),
+          ]),
         ),
-        Align(
-            alignment: Alignment.bottomLeft,
-            child: TypingIndicator(
-              showIndicator: controller.isWaitingForAnswer,
-              bubbleColor: Colors.grey[300]!,
-            ),
+      ),
+      Align(
+        alignment: Alignment.bottomLeft,
+        child: TypingIndicator(
+          showIndicator: controller.isWaitingForAnswer,
+          bubbleColor: Colors.grey[300]!,
+        ),
+      ),
+      Align(
+          child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 4, 0, 10),
+            child: ElevatedButton(
+                style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(AppColors.appBarColor)),
+                onPressed: () => controller.getUserCategory(context),
+                child: const Text("What type of collector am I?")),
           ),
-        Align(
-            child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0,4,0,10),
-              child: ElevatedButton(
-                  style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStateProperty.all(AppColors.appBarColor)),
-                  onPressed: () => controller.getUserCategory(context),
-                  child: const Text("What type of collector am I?")),
-            ),
-            _createMessageBar(),
-          ],
-        ))
-      ]);
+          _createMessageBar(),
+        ],
+      ))
+    ]);
   }
 
-  Widget _createSentChatBubble(String text) {
+  Widget _createSentChatBubble(Message message) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
           child: ChatBubble(
-            clipper: ChatBubbleClipper1(type: BubbleType.sendBubble),
+            clipper: ChatBubbleClipper7(type: BubbleType.sendBubble),
             alignment: Alignment.topRight,
             margin: const EdgeInsets.only(top: 20),
             backGroundColor: Colors.yellow[200],
             child: Container(
               constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.7,
+                maxWidth: ScreenSize.width * 0.7,
               ),
               child: Text(
-                text,
+                message.text,
                 style: const TextStyle(color: Colors.black),
               ),
             ),
@@ -151,9 +148,9 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  Widget _createRecievedChatBubble(String text) {
+  Widget _createRecievedChatBubble(Message message) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 10),
@@ -164,19 +161,27 @@ class _ChatPageState extends State<ChatPage> {
         ),
         Expanded(
           child: ChatBubble(
-            clipper: ChatBubbleClipper1(type: BubbleType.receiverBubble),
+            clipper: ChatBubbleClipper7(type: BubbleType.receiverBubble),
             backGroundColor: Colors.grey[300],
             margin: const EdgeInsets.only(top: 20),
             child: Container(
               constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.7,
+                maxWidth: ScreenSize.width * 0.7,
               ),
               child: Text(
-                text,
+                message.text,
                 style: const TextStyle(color: Colors.black),
               ),
             ),
           ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.feedback),
+          onPressed: () => {
+            showDialog(
+                context: context,
+                builder: (BuildContext ctx) => FeedbackPopup(message: message))
+          },
         ),
       ],
     );
