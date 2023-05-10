@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:project/components/chat/typing_indicator.dart';
 import 'package:project/entities/message.dart';
 import 'package:project/general/fonts.dart';
 import 'package:project/general/themes.dart';
@@ -94,10 +95,17 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ),
         Align(
+            alignment: Alignment.bottomLeft,
+            child: TypingIndicator(
+              showIndicator: controller.isWaitingForAnswer,
+              bubbleColor: Colors.grey[300]!,
+            ),
+          ),
+        Align(
             child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              padding: const EdgeInsets.fromLTRB(0,4,0,10),
               child: ElevatedButton(
                   style: ButtonStyle(
                       backgroundColor:
@@ -197,6 +205,7 @@ class _ChatPageState extends State<ChatPage> {
                     controller._textFieldController.clear();
                     setState(() {
                       controller.messages!.add(message);
+                      controller.isWaitingForAnswer = true;
                     });
                     await controller.sendMessage(context, message);
                   }),
@@ -214,6 +223,7 @@ class _ChatPageState extends State<ChatPage> {
                 controller._textFieldController.clear();
                 setState(() {
                   controller.messages!.add(message);
+                  controller.isWaitingForAnswer = true;
                 });
                 await controller.sendMessage(context, message);
               },
@@ -243,6 +253,7 @@ class ChatController extends GetxController {
   late String id;
   List<Message>? messages = [];
   final _textFieldController = TextEditingController();
+  bool isWaitingForAnswer = false;
 
   loadMessages() async {
     messages = await userService.getPreviousMessagesByUserId(id);
@@ -264,6 +275,7 @@ class ChatController extends GetxController {
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
+    isWaitingForAnswer = false;
     update();
   }
 

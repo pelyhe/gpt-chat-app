@@ -1,3 +1,4 @@
+import asyncio
 import csv
 import logging
 from pathlib import Path
@@ -27,9 +28,11 @@ userModel = db['users']
 
 ## THE MODEL WHICH USES GENERAL GPT KNOWLEDGE, BUT DONT ALWAYS RESPONSE WITH THE RIGHT ANSWER
 
-class ChatController(BaseModel):
+class ChatController(object):
+    def __init__(self):
+        self._create_chat_agent()
 
-    def _create_chat_agent(memory):
+    def _create_chat_agent(self):
 
         doc_set = {}
         all_docs = []
@@ -49,8 +52,8 @@ class ChatController(BaseModel):
             doc_set[filename] = document
             all_docs.extend(document)
 
-        # initialize simple vector indices + global vector index
-        service_context = ServiceContext.from_defaults(chunk_size_limit=1000)
+        # # initialize simple vector indices + global vector index
+        service_context = ServiceContext.from_defaults(chunk_size_limit=512)
         index_set = {}
         for filename in os.listdir(DOCUMENTS_DIRECTORY):
             curr_index = GPTSimpleVectorIndex.from_documents(
@@ -64,7 +67,7 @@ class ChatController(BaseModel):
         #     curr_index = GPTSimpleVectorIndex.load_from_disk(f'indices/index_{filename}.json')
         #     index_set[filename] = curr_index
 
-        llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-4", max_tokens=1000))
+        llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-4", max_tokens=1024))
         service_context = ServiceContext.from_defaults(
             llm_predictor=llm_predictor)
 
@@ -152,16 +155,16 @@ class ChatController(BaseModel):
             graph_configs=[graph_config]
         )
 
-        llm = OpenAI(temperature=0, model_name="gpt-4")
+        llm = OpenAI(temperature=0, model_name="gpt-4", top_p=0.2, presence_penalty=0.4, frequency_penalty=0.2)
 
-        return create_llama_chat_agent(
+        self.agent = create_llama_chat_agent(
             toolkit,
             llm,
-            memory=memory,
-            verbose=True
+            memory=ConversationBufferMemory(),
+            verbose=False
         )
 
-    def _update_previous_messages(userId: str, prompt: str, response: str):
+    def _update_previous_messages(self, userId: str, prompt: str, response: str):
         new_message = {
             "user": prompt,
             "ai": response,
@@ -171,14 +174,14 @@ class ChatController(BaseModel):
         userModel.update_one({"_id": ObjectId(userId)}, {
                              "$push": {"previousMessages": new_message}})
 
-    def _log_to_file(prompt, responseTime, succeed, errorMessage=None):
+    def _log_to_file(self, prompt, responseTime, succeed, errorMessage=None):
         if succeed:
             logging.critical('RESPONSE TIME: '+ responseTime +'. Question: '+ prompt)
         else:
             logging.critical('ERROR: ' + errorMessage)
 
     # after every 5 questions, update db with user's category
-    def _update_user_category(id: str):
+    def _update_user_category(self, id: str):
         document = userModel.find_one({"_id": id})
         previousMessages = document['previousMessages']
         if len(previousMessages) % 5 == 0 and len(previousMessages) != 0:
@@ -205,9 +208,7 @@ class ChatController(BaseModel):
                 update = { "$set": { "category": "thematic" } }
                 userModel.update_one(filter, update)
 
-
-    @classmethod
-    def askAI(cls, prompt: str, id: str):
+    async def askAI(self, prompt: str, id: str):
         try:
             objId = ObjectId(id)
         except:
@@ -222,28 +223,29 @@ class ChatController(BaseModel):
             with open('conv_memory/'+id+'.pickle', 'rb') as handle:
                 mem = pickle.load(handle)
 
-        cls._update_user_category(id=objId)
-        agent_executor = cls._create_chat_agent(mem)
+        self._update_user_category(id=objId)
+        # agent_executor = cls._create_chat_agent(mem)
+        self.agent.memory = mem
 
-        # beforeResponseTimestamp = datetime.datetime.now()
+        beforeResponseTimestamp = datetime.datetime.now()
         # for could not parse LLM output
         try:
-            response = agent_executor.run(input=prompt + ". Please act like you are a galleries in Glassyard, feel free to ask questions from me.")
+            response = await self.agent.arun(input=prompt)
         except ValueError as e:
             response = str(e)
             if not response.startswith("Could not parse LLM output: `"):
-                # cls._log_to_file(prompt, responseTime, succeed=False, errorMessage=str(e))
+                self._log_to_file(prompt, responseTime, succeed=False, errorMessage=str(e))
                 raise e
             response = response.removeprefix(
                 "Could not parse LLM output: `").removesuffix("`")
 
-        # afterResponseTimestamp = datetime.datetime.now()
-        # responseTime = afterResponseTimestamp-beforeResponseTimestamp
-        # cls._log_to_file(prompt, str(responseTime), succeed=True)
+        afterResponseTimestamp = datetime.datetime.now()
+        responseTime = afterResponseTimestamp-beforeResponseTimestamp
+        self._log_to_file(prompt, str(responseTime), succeed=True)
 
         # save memory after response
         with open('conv_memory/' + id + '.pickle', 'wb') as handle:
             pickle.dump(mem, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        cls._update_previous_messages(id, prompt, response)
+        self._update_previous_messages(id, prompt, response)
         return {"answer": response}

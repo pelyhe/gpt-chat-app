@@ -69,10 +69,10 @@ class _UserCardState extends State<UserCard> {
                             : 30,
                     backgroundColor: AppColors.kPrimaryColor,
                     child: ScreenSize.isDesktop
-                        ? createAvatarFromName(80, widget.user.username, 0)
+                        ? createAvatarFromName(80, _getUsername(widget.user), 0)
                         : ScreenSize.isTablet
-                            ? createAvatarFromName(60, widget.user.username, 0)
-                            : createAvatarFromName(40, widget.user.username, 0),
+                            ? createAvatarFromName(60, _getUsername(widget.user), 0)
+                            : createAvatarFromName(40, _getUsername(widget.user), 0),
                   ),
                 ),
                 Padding(
@@ -93,5 +93,18 @@ class _UserCardState extends State<UserCard> {
         ),
       ),
     );
+  }
+
+  String _getUsername(User user) {
+    List<String> username = user.username.split(' ');
+    if (username.length > 1) {
+      String secondName = username[1];
+      while (secondName.startsWith(RegExp('^[^a-zA-Z0-9]'))) {
+        secondName = secondName.substring(1);
+      }
+      return username[0] + ' ' + secondName;
+    } else {
+      return username[0];
+    }
   }
 }

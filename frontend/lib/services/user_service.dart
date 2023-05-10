@@ -46,13 +46,13 @@ class UserService {
         final List<Message> result = [];
         Message message;
         for (var i = 0; i < jsonData.length; i++) {
-          String userText = jsonData[i]['user'].replaceAll("\n", "");
+          String userText = jsonData[i]['user'].trim();
           message = Message(
               text: userText,
               date: DateTime.parse(jsonData[i]['timestamp']),
               isSentByMe: true);
           result.add(message);
-          String aiText = jsonData[i]['ai'].replaceAll("\n", "");
+          String aiText = jsonData[i]['ai'].trim();
           message = Message(
               text: aiText,
               date: DateTime.parse(jsonData[i]['timestamp']),
