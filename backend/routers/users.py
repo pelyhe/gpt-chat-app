@@ -23,6 +23,6 @@ def get_user_by_username(username: str):
 def get_previous_messages_by_user_id(id):
     return UserController.get_previous_messages_by_user_id(id)
 
-@router.get("/user/categorize/{id}", tags=["user", "categorize"])
-def categorize_user_by_id(id: str):
-    return UserController.categorize_user_by_id(id).response
+@router.get("/user/categorize", tags=["user", "categorize"])
+def categorize_user_by_id(prompt: str):
+    return UserController.categorize_user_by_id(prompt).response
