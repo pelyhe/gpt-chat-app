@@ -230,7 +230,7 @@ class _LocationPageState extends State<LocationPage> {
   Column jobCol() {
     return Column(
       children: [
-        Text("What is Your profession?", style: AppFonts.mediumFont),
+        Text("What is your profession?", style: AppFonts.mediumFont),
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -307,7 +307,7 @@ class _LocationPageState extends State<LocationPage> {
   Column artfairCol() {
     return Column(
       children: [
-        Text("Do You got to Art Auctions?", style: AppFonts.mediumFont),
+        Text("Do you got to Art Auctions?", style: AppFonts.mediumFont),
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -352,7 +352,7 @@ class _LocationPageState extends State<LocationPage> {
   Column artAuctionCol() {
     return Column(
       children: [
-        Text("Do You got to Art Fairs?", style: AppFonts.mediumFont),
+        Text("Do you got to Art Fairs?", style: AppFonts.mediumFont),
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -459,6 +459,15 @@ class LocationController extends GetxController {
     if (title == "Brompton Road") {
       return 'images/brompton_road_picture.png';
     }
+    if (title == "Costumier") {
+      return 'images/costumier.png';
+    }
+    if (title == "Hatton Garden") {
+      return 'images/hatton_garden.png';
+    }
+    if (title == "New Bond St") {
+      return 'images/new_bond_st.png';
+    }
 
     if (title == "Koller Gallery") {
       return 'images/koller_gallery.jpg';
@@ -469,6 +478,28 @@ class LocationController extends GetxController {
     if (title == "The British Museum") {
       return 'images/british_museum_gallery.jpg';
     }
+    if (title == "Glassyard Gallery") {
+      return 'images/glassyard_gallery.png';
+    }
+
+    if (title == "Julian Rosefeldt") {
+      return 'images/julian_rosefeldt.png';
+    }
+    if (title == "Paul Herrmann") {
+      return 'images/no_image.png';
+    }
+    if (title == "William Anthony") {
+      return 'images/no_image.png';
+    }
+    if (title == "Jule Waibel") {
+      return 'images/jule_waibel.png';
+    }
+    if (title == "Sarah Dobai") {
+      return 'images/sarah_dobai.png';
+    }
+
+
+
     return 'images/no_image.png';
   }
 
