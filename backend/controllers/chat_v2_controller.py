@@ -59,13 +59,6 @@ class ChatController(object):
             curr_index = GPTSimpleVectorIndex.from_documents(
                 doc_set[filename], service_context=service_context)
             index_set[filename] = curr_index
-            curr_index.save_to_disk(f'indices/index_{filename}.json') 
-        
-        # Load indices from disk
-        # index_set = {}
-        # for filename in os.listdir(DOCUMENTS_DIRECTORY):
-        #     curr_index = GPTSimpleVectorIndex.load_from_disk(f'indices/index_{filename}.json')
-        #     index_set[filename] = curr_index
 
         llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-4", max_tokens=1024))
         service_context = ServiceContext.from_defaults(
@@ -80,11 +73,6 @@ class ChatController(object):
                 "useful for when you need to answer questions about the gallery, artworks, Sara Dobai, Rober Bresson, Glassyard Gallery, exhibition or any information about people related to art." for x in index_set],
             service_context=service_context
         )
-
-        graph.save_to_disk(f'indices/'+ GRAPH_INDEX_FILENAME)
-
-
-        # graph = ComposableGraph.load_from_disk(f'indices/'+ GRAPH_INDEX_FILENAME)
 
         decompose_transform = DecomposeQueryTransform(
             llm_predictor, verbose=True
