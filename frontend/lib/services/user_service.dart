@@ -13,6 +13,7 @@ class UserService {
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           });
+
       if (response.statusCode != 200) {
         return null;
       } else {
@@ -45,19 +46,37 @@ class UserService {
         final List<Message> result = [];
         Message message;
         for (var i = 0; i < jsonData.length; i++) {
+          String userText = jsonData[i]['user'].trim();
           message = Message(
-              text: jsonData[i]['user'],
+              text: userText,
               date: DateTime.parse(jsonData[i]['timestamp']),
-              isSentByMe: true
-          );
+              isSentByMe: true);
           result.add(message);
+          String aiText = jsonData[i]['ai'].trim();
           message = Message(
-            text: jsonData[i]['ai'],
-            date: DateTime.parse(jsonData[i]['timestamp']),
-            isSentByMe: false
-          );
+              text: aiText,
+              date: DateTime.parse(jsonData[i]['timestamp']),
+              isSentByMe: false);
           result.add(message);
         }
+        return result;
+      }
+    } catch (error) {
+      return null;
+    }
+  }
+
+  Future<String?> getUserCategory(String prompt) async {
+    try {
+      final response = await http.get(
+          Uri.parse('${dotenv.env['CHAT_API_URL']}/user/categorize?prompt=$prompt'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          });
+      if (response.statusCode != 200) {
+        return null;
+      } else {
+        final result = jsonDecode(response.body);
         return result;
       }
     } catch (error) {

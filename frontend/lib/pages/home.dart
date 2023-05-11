@@ -55,19 +55,22 @@ class _HomePageState extends State<HomePage> {
     return Background(
       child: SingleChildScrollView(
         child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text("Select user", style: AppFonts.headerFont),
-              Row(
-                children: [
-                  const SizedBox(width: 50),
-                  for (var u in controller.users!)
-                    Expanded(child: UserCard(user: u)),
-                  const SizedBox(width: 50),
-                ],
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 15.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text("Select user", style: AppFonts.headerFont),
+                Wrap(
+                  spacing: 4.0,
+                  runSpacing: 30.0,
+                  children: [
+                    for (var u in controller.users!)
+                      UserCard(user: u),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -78,19 +81,22 @@ class _HomePageState extends State<HomePage> {
     return Background(
       child: SingleChildScrollView(
         child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text("Select user", style: AppFonts.headerFont),
-              Row(
-                children: [
-                  const SizedBox(width: 50),
-                  for (var u in controller.users!)
-                    Expanded(child: UserCard(user: u)),
-                  const SizedBox(width: 50),
-                ],
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 15.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text("Select user", style: AppFonts.headerFont),
+                Wrap(
+                  spacing: 4.0,
+                  runSpacing: 30.0,
+                  children: [
+                    for (var u in controller.users!)
+                      UserCard(user: u),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

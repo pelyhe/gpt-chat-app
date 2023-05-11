@@ -1,5 +1,7 @@
 import logging
-LOG_FILE_PATH = 'config/categorize.log'
+
+from pathlib import Path
+LOG_FILE_PATH = 'config/log.log'
 logging.basicConfig(filename=LOG_FILE_PATH, filemode='a', level=logging.CRITICAL,
                     format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
 import os
@@ -7,8 +9,9 @@ import json
 from bson import ObjectId
 from fastapi import HTTPException
 from langchain import OpenAI
-from llama_index import GPTSimpleVectorIndex, LLMPredictor, PromptHelper, ServiceContext, SimpleDirectoryReader
+from llama_index import GPTSimpleVectorIndex, LLMPredictor, download_loader, ServiceContext, SimpleDirectoryReader
 from pydantic import BaseModel
+USER_CATEGORY_DIRECTORY = 'data/user_categorize.docx'
 from config.db import get_db
 db = get_db()
 userModel = db['users']
@@ -17,6 +20,7 @@ artistModel = db['artists']
 galleryModel = db['gallery']
 os.environ['OPENAI_API_KEY'] = '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'
 
+#
 
 class UserController(BaseModel):
 
@@ -51,32 +55,10 @@ class UserController(BaseModel):
                 status_code=400, detail="Not a valid user or previous messages no previous messages array.")
 
     @classmethod
-    def categorize_user_by_id(cls, id: str):
-        objId = ObjectId(id)
-        document = userModel.find_one({"_id": objId})        
+    def categorize_user_by_id(cls, previousPrompts: str):
 
-        artworkTypes = []
-        for artworkId in document['favouriteArtworks']:
-            artwork = artworkModel.find_one({"_id": artworkId})
-            if artwork != None:
-                artworkTypes.append(artwork['type'])
-
-        goAuction = bool(document['goAuctions'])
-        goArtfairs = bool(document['goArtfairs'])
-        hasFavouriteArtists = len(document['favouriteArtists']) != 0
-
-        artworkTypes = list(dict.fromkeys(artworkTypes))
-        isInterstedInMultipleArtworkTypes = len(artworkTypes) > 1
-
-        categorize_query = cls.CategorizeQuery(
-            goAuctions=goAuction,
-            goArtfairs=goArtfairs,
-            hasFavouriteArtists=hasFavouriteArtists,
-            isInterestedInMultipleArtworkTypes=isInterstedInMultipleArtworkTypes
-        )
-
-        response = cls._get_category_by_ai(categorize_query)
-        cls._log_category_by_ai(categorize_query, response.response)
+        response = cls._get_category_by_ai(previousPrompts)
+        #cls._log_category_by_ai(categorize_query, response.response)
         return response
 
     ### helper functions start here ###
@@ -93,20 +75,22 @@ class UserController(BaseModel):
         def toJSON(self):
             return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
-    def _get_category_by_ai(query: CategorizeQuery):
+    def _get_category_by_ai(prompt: str):
         llm_predictor = LLMPredictor(llm=OpenAI(
             temperature=0, model_name="gpt-3.5-turbo"))
         service_context = ServiceContext.from_defaults(
             llm_predictor=llm_predictor
         )
-        document = SimpleDirectoryReader(
-            input_files=["data/categorize_users.txt"]).load_data()   # TODO: constant value here!
+        DocxReader = download_loader("DocxReader")
+        loader = DocxReader()
+        f = USER_CATEGORY_DIRECTORY
+        document = loader.load_data(file=Path(f)) 
         index = GPTSimpleVectorIndex.from_documents(
             document, service_context=service_context)
         
-        jsonObject = query.toJSON()
-        print(jsonObject)
-        return index.query("Please categorize this user according to the document provided in context. You will have a json file parsed to string and you have all the data inside of it from the user. The response should only include one word, the category of the user, according to the document, starting with small letter. The json file is here: " + jsonObject )
+        #jsonObject = query.toJSON()
+        #print(jsonObject)
+        return index.query("Please categorize this user by its previous questions. The response should only include one or two word, the category of the user, according to the context, starting with small letter. Each question is seperated with a '|'. The user's previous questions starts here: " + prompt )
 
     def _log_category_by_ai(query: CategorizeQuery,response: str):
         userCategory = ""

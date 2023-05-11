@@ -1,14 +1,12 @@
 # import necessary packages
 import os
 from fastapi import APIRouter
-from controllers.chat_controller import ChatController
-
-# TODO: put api key in env variable
-os.environ['OPENAI_API_KEY'] = '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'
+from controllers.chat_v2_controller import ChatController
 
 router = APIRouter()
+chat_controller = ChatController()
 
 @router.get("/ask",  tags=["user", "chat"])
-def ask(prompt: str, id: str):
-    return ChatController.askAI(prompt=prompt, id=id)
+async def ask(prompt: str, id: str):
+    return await chat_controller.askAI(prompt=prompt, id=id)
 

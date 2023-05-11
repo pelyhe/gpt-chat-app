@@ -26,31 +26,31 @@ class _UserCardState extends State<UserCard> {
         widget.isHovering ? widget.hoveredTransform : Matrix4.identity();
     final elevation = widget.isHovering ? 50.0 : 10.0;
 
-    return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context, '/chat?id=${widget.user.id}');
-      }, 
-      onHover: (isHovering) {
-        if (isHovering) {
-          if (mounted) {
-            setState(() {
-              widget.isHovering = true;
-            });
+    return SizedBox(
+      width: ScreenSize.width * 0.7 > 300 ? 300 : ScreenSize.width * 0.7,
+      height: ScreenSize.width * 0.7 > 500 ? 500 : ScreenSize.width * 0.7,
+      child: InkWell(
+        onTap: () {
+          Navigator.pushNamed(context, '/chat?id=${widget.user.id}');
+        },
+        onHover: (isHovering) {
+          if (isHovering) {
+            if (mounted) {
+              setState(() {
+                widget.isHovering = true;
+              });
+            }
+          } else {
+            if (mounted) {
+              setState(() {
+                widget.isHovering = false;
+              });
+            }
           }
-        } else {
-          if (mounted) {
-            setState(() {
-              widget.isHovering = false;
-            });
-          }
-        }
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        transform: transform,
-        child: SizedBox(
-          width: ScreenSize.width * 0.7 > 300 ? 300 : ScreenSize.width * 0.7,
-          height: ScreenSize.width * 0.7 > 500 ? 500 : ScreenSize.width * 0.7,
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          transform: transform,
           child: Card(
             elevation: elevation,
             color: AppColors.kPrimaryLightColor,
@@ -69,13 +69,10 @@ class _UserCardState extends State<UserCard> {
                             : 30,
                     backgroundColor: AppColors.kPrimaryColor,
                     child: ScreenSize.isDesktop
-                            ? createAvatarFromName(
-                                80, widget.user.username, 0)
-                            : ScreenSize.isTablet
-                                ? createAvatarFromName(
-                                    60, widget.user.username, 0)
-                                : createAvatarFromName(
-                                    40, widget.user.username, 0),
+                        ? createAvatarFromName(80, _getUsername(widget.user), 0)
+                        : ScreenSize.isTablet
+                            ? createAvatarFromName(60, _getUsername(widget.user), 0)
+                            : createAvatarFromName(40, _getUsername(widget.user), 0),
                   ),
                 ),
                 Padding(
@@ -96,5 +93,18 @@ class _UserCardState extends State<UserCard> {
         ),
       ),
     );
+  }
+
+  String _getUsername(User user) {
+    List<String> username = user.username.split(' ');
+    if (username.length > 1) {
+      String secondName = username[1];
+      while (secondName.startsWith(RegExp('^[^a-zA-Z0-9]'))) {
+        secondName = secondName.substring(1);
+      }
+      return username[0] + ' ' + secondName;
+    } else {
+      return username[0];
+    }
   }
 }
