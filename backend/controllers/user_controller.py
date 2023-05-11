@@ -9,7 +9,7 @@ import json
 from bson import ObjectId
 from fastapi import HTTPException
 from langchain import OpenAI
-from llama_index import GPTSimpleVectorIndex, LLMPredictor, download_loader, ServiceContext, SimpleDirectoryReader
+from llama_index import GPTSimpleVectorIndex, LLMPredictor, download_loader, ServiceContext
 from pydantic import BaseModel
 USER_CATEGORY_DIRECTORY = 'data/user_categorize.docx'
 from config.db import get_db
@@ -53,6 +53,24 @@ class UserController(BaseModel):
         else:
             raise HTTPException(
                 status_code=400, detail="Not a valid user or previous messages no previous messages array.")
+
+    # TODO: update str to lists of objectIds
+    # TODO: use this: auc = auctions == 'true' 
+    def update_user(id: str, location: str, favArtwork: str, favGallery: str, favArtist: str, auctions: str, fairs: str, vip: str):
+        auc = False
+        fair = False
+        isVip = False
+        if(auctions == 'true'):
+            auc = True
+        if(fairs == 'true'):
+            fair = True
+        if(vip == 'true'):
+            isVip = True
+        userModel.update_one({"_id": ObjectId(id)}, {
+                                "$push": {"favouriteArtists": favArtist, "favouriteGalleries": favGallery,"favouriteArtworks": favArtwork}, #---
+                                "$set" : {"isVip": isVip,"location": location,"goAuctions": fair,"goArtfairs": auc}, #---
+                             }
+                            )
 
     @classmethod
     def categorize_user_by_id(cls, previousPrompts: str):
@@ -106,3 +124,5 @@ class UserController(BaseModel):
             logging.critical('MATCHING! AI: ' + response + ' | CALCULATED: ' + userCategory)
         else:
             logging.critical('DIFFERENT! AI: ' + response + ' | CALCULATED: ' + userCategory)
+        
+

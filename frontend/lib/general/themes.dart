@@ -17,6 +17,12 @@ class AppFonts {
       fontSize: 40,
       color: AppColors.kPrimaryColor,
       fontWeight: FontWeight.bold);
+
+  static TextStyle mediumFont = GoogleFonts.kanit(
+    letterSpacing: 1,
+    fontSize: 20,
+    color: AppColors.kPrimaryColor,
+    fontWeight: FontWeight.bold);
 }
 
 class AppTimeFormats {}
