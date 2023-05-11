@@ -25,8 +25,6 @@ class LocationPage extends StatefulWidget {
 
 class _LocationPageState extends State<LocationPage> {
   final controller = LocationController();
-  TextEditingController countryField = TextEditingController();
-  TextEditingController cityField = TextEditingController();
   Future? load;
 
   @override
@@ -86,9 +84,11 @@ class _LocationPageState extends State<LocationPage> {
                   children: [
                     SizedBox(
                       // 2 * 300 = textbox width, +30 = 10*2 (horizontal column padding) + 10 (space between fields)
-                      width: ScreenSize.width * 0.9 > 2*300+30 ? 300 : ScreenSize.width * 0.9 / 2 - 30,
+                      width: ScreenSize.width * 0.9 > 2 * 300 + 30
+                          ? 300
+                          : ScreenSize.width * 0.9 / 2 - 30,
                       child: TextField(
-                        controller: countryField,
+                        controller: controller.countryField,
                         decoration: InputDecoration(
                             border: const OutlineInputBorder(),
                             hintText: 'Country',
@@ -99,9 +99,11 @@ class _LocationPageState extends State<LocationPage> {
                       width: 10,
                     ),
                     SizedBox(
-                      width: ScreenSize.width * 0.9 > 2*300+10 ? 300 : ScreenSize.width * 0.9 / 2 - 10,
+                      width: ScreenSize.width * 0.9 > 2 * 300 + 10
+                          ? 300
+                          : ScreenSize.width * 0.9 / 2 - 10,
                       child: TextField(
-                        controller: cityField,
+                        controller: controller.cityField,
                         decoration: InputDecoration(
                             border: const OutlineInputBorder(),
                             hintText: 'City',
@@ -180,8 +182,9 @@ class _LocationPageState extends State<LocationPage> {
                 ],
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: ScreenSize.width /4, vertical: 30 ),
-                child: saveBtn())
+                  padding: EdgeInsets.symmetric(
+                      horizontal: ScreenSize.width / 4, vertical: 30),
+                  child: saveBtn())
             ],
           ),
         ),
@@ -214,7 +217,7 @@ class _LocationPageState extends State<LocationPage> {
                     SizedBox(
                       width: 300,
                       child: TextField(
-                        controller: countryField,
+                        controller: controller.countryField,
                         decoration: InputDecoration(
                             border: const OutlineInputBorder(),
                             hintText: 'Country',
@@ -227,7 +230,7 @@ class _LocationPageState extends State<LocationPage> {
                     SizedBox(
                       width: 300,
                       child: TextField(
-                        controller: cityField,
+                        controller: controller.cityField,
                         decoration: InputDecoration(
                             border: const OutlineInputBorder(),
                             hintText: 'City',
@@ -306,8 +309,9 @@ class _LocationPageState extends State<LocationPage> {
                 ],
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: ScreenSize.width /4, vertical: 30 ),
-                child: saveBtn())
+                  padding: EdgeInsets.symmetric(
+                      horizontal: ScreenSize.width / 4, vertical: 30),
+                  child: saveBtn())
             ],
           ),
         ),
@@ -475,11 +479,7 @@ class _LocationPageState extends State<LocationPage> {
 
   Widget saveBtn() {
     return ElevatedButton(
-      onPressed: () {
-        controller.currentUser.city = cityField.text;
-        controller.currentUser.country = countryField.text;
-        controller.userService.updateUser(controller.currentUser);
-      },
+      onPressed: () async => await controller.submit(context),
       child: Text(
         "Save Preferences".toUpperCase(),
       ),
@@ -501,6 +501,8 @@ class LocationController extends GetxController {
   String? jobGroupVal = "Other";
   String? auctionGroupVal = "No";
   String? fairGroupVal = "No";
+  TextEditingController countryField = TextEditingController();
+  TextEditingController cityField = TextEditingController();
 
   load() async {
     users = await userService.getUsers();
@@ -589,5 +591,18 @@ class LocationController extends GetxController {
 
   void setFairs(bool b) {
     currentUser.fairs = b;
+  }
+
+  Future<void> submit(BuildContext context) async {
+    currentUser.city = cityField.text;
+    currentUser.country = countryField.text;
+    await userService.updateUser(currentUser);
+    final snackBar = SnackBar(
+      content:
+          const Text("Preferences saved successfully.", style: TextStyle(fontSize: 20)),
+      backgroundColor: Colors.green[400]!,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    Navigator.pop(context);
   }
 }
