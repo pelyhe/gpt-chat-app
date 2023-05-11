@@ -51,7 +51,7 @@ class _LocationPageState extends State<LocationPage> {
                   return Scaffold(
                     body: scaffoldBody(
                       context: context,
-                      //mobileBody: _mobileBody(),
+                      mobileBody: _mobileBody(),
                       tabletBody: _mobileBody(),
                       desktopBody: _desktopBody(),
                     ),
@@ -61,46 +61,131 @@ class _LocationPageState extends State<LocationPage> {
         });
   }
 
+  //                     width: ScreenSize.width * 0.9 > 2*300+10 ? 300 : ScreenSize.width * 0.9 / 2 - 10,
   Widget _mobileBody() {
     return Background(
       child: SingleChildScrollView(
-        child: SafeArea(
+          child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(
-                  "Can we use your location to help with better recommendations?",
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  child: Text(
+                      "Can we use your location to help with better recommendations?",
+                      style: AppFonts.headerFont),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      // 2 * 300 = textbox width, +30 = 10*2 (horizontal column padding) + 10 (space between fields)
+                      width: ScreenSize.width * 0.9 > 2*300+30 ? 300 : ScreenSize.width * 0.9 / 2 - 30,
+                      child: TextField(
+                        controller: countryField,
+                        decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            hintText: 'Country',
+                            fillColor: AppColors.grey!),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    SizedBox(
+                      width: ScreenSize.width * 0.9 > 2*300+10 ? 300 : ScreenSize.width * 0.9 / 2 - 10,
+                      child: TextField(
+                        controller: cityField,
+                        decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            hintText: 'City',
+                            fillColor: AppColors.grey!),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+              Text("Which artwork you prefer the most?",
                   style: AppFonts.headerFont),
-              Row(
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Wrap(
+                  runSpacing: 15,
+                  spacing: 15,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    for (var a in controller.artworks!)
+                      GeneralCard(
+                        name: a.title,
+                        callback: controller.setFavArtwork,
+                        pictureURL: controller.setURL(a.title),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+              Text("Which gallery you prefer the most?",
+                  style: AppFonts.headerFont),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Wrap(
+                  runSpacing: 15,
+                  spacing: 15,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    for (var g in controller.galleries!)
+                      GeneralCard(
+                        name: g.name,
+                        callback: controller.setFavGallery,
+                        pictureURL: controller.setURL(g.name),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+              Text("Which artist you prefer the most?",
+                  style: AppFonts.headerFont),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Wrap(
+                  runSpacing: 15,
+                  spacing: 15,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    for (var a in controller.artists!)
+                      GeneralCard(
+                        name: a.name,
+                        callback: controller.setFavArtist,
+                        pictureURL: controller.setURL(a.name),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+              Wrap(
+                runSpacing: 15,
+                spacing: 15,
+                alignment: WrapAlignment.center,
                 children: [
-                  SizedBox(
-                    width: 200,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        //Save answer to db
-                      },
-                      child: Text(
-                        "Yes".toUpperCase(),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 200,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        //Save answer to db
-                      },
-                      child: Text(
-                        "No".toUpperCase(),
-                      ),
-                    ),
-                  ),
+                  jobCol(),
+                  artfairCol(),
+                  artAuctionCol(),
                 ],
-              )
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: ScreenSize.width /4, vertical: 30 ),
+                child: saveBtn())
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 
@@ -108,308 +193,296 @@ class _LocationPageState extends State<LocationPage> {
     return Background(
       child: SingleChildScrollView(
           child: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(width: ScreenSize.width, height: ScreenSize.height * 0.05),
-            Text(
-                "Can we use your location to help with better recommendations?",
-                style: AppFonts.headerFont),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: ScreenSize.isMobile ? 5 : 300, vertical: 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: countryField,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Country',
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextField(
-                      controller: cityField,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'City',
-                      ),
-                    ),
-                  ),
-                ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 50.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  child: Text(
+                      "Can we use your location to help with better recommendations?",
+                      style: AppFonts.headerFont),
+                ),
               ),
-            ),
-            SizedBox(width: ScreenSize.width, height: ScreenSize.height * 0.05),
-            Text("Which artwork you prefer the most?",
-                style: AppFonts.headerFont),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: ScreenSize.isMobile ? 5 : 100, vertical: 10),
-              child: Row(
-                children: [
-                  for (var a in controller.artworks!)
-                    Expanded(
-                      child: GeneralCard(
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 300,
+                      child: TextField(
+                        controller: countryField,
+                        decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            hintText: 'Country',
+                            fillColor: AppColors.grey!),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 30,
+                    ),
+                    SizedBox(
+                      width: 300,
+                      child: TextField(
+                        controller: cityField,
+                        decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            hintText: 'City',
+                            fillColor: AppColors.grey!),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+              Text("Which artwork you prefer the most?",
+                  style: AppFonts.headerFont),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Wrap(
+                  runSpacing: 15,
+                  spacing: 15,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    for (var a in controller.artworks!)
+                      GeneralCard(
                         name: a.title,
                         callback: controller.setFavArtwork,
                         pictureURL: controller.setURL(a.title),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            SizedBox(width: ScreenSize.width, height: ScreenSize.height * 0.05),
-            Text("Which gallery you prefer the most?",
-                style: AppFonts.headerFont),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
-              child: Row(
-                children: [
-                  for (var g in controller.galleries!)
-                    Expanded(
-                      child: GeneralCard(
+              const SizedBox(height: 30),
+              Text("Which gallery you prefer the most?",
+                  style: AppFonts.headerFont),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Wrap(
+                  runSpacing: 15,
+                  spacing: 15,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    for (var g in controller.galleries!)
+                      GeneralCard(
                         name: g.name,
                         callback: controller.setFavGallery,
                         pictureURL: controller.setURL(g.name),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            SizedBox(width: ScreenSize.width, height: ScreenSize.height * 0.05),
-            Text("Which artist you prefer the most?",
-                style: AppFonts.headerFont),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: ScreenSize.isMobile ? 5 : 400, vertical: 10),
-              child: Row(
-                children: [
-                  for (var a in controller.aritsts!)
-                    Expanded(
-                      child: GeneralCard(
+              const SizedBox(height: 30),
+              Text("Which artist you prefer the most?",
+                  style: AppFonts.headerFont),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Wrap(
+                  runSpacing: 15,
+                  spacing: 15,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    for (var a in controller.artists!)
+                      GeneralCard(
                         name: a.name,
                         callback: controller.setFavArtist,
                         pictureURL: controller.setURL(a.name),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            //Text("SKIP THIS: Purchased Artworks", style: AppFonts.headerFont),
-            SizedBox(width: ScreenSize.width, height: ScreenSize.height * 0.05),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: ScreenSize.width * 0.27,
-                  vertical: 0),
-              child: Row(
+              const SizedBox(height: 30),
+              Wrap(
+                runSpacing: 15,
+                spacing: 15,
+                alignment: WrapAlignment.center,
                 children: [
                   jobCol(),
-                  SizedBox(width: ScreenSize.width*0.01, height: ScreenSize.height * 0.05),
                   artfairCol(),
-                  SizedBox(width: ScreenSize.width*0.01, height: ScreenSize.height * 0.05),
                   artAuctionCol(),
                 ],
               ),
-            ),
-            SizedBox(width: ScreenSize.width, height: ScreenSize.height * 0.03),
-            saveBtn(),
-            SizedBox(width: ScreenSize.width, height: ScreenSize.height * 0.03),
-          ],
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: ScreenSize.width /4, vertical: 30 ),
+                child: saveBtn())
+            ],
+          ),
         ),
       )),
     );
   }
 
-  Column jobCol() {
-    return Column(
-      children: [
-        Text("What is your profession?", style: AppFonts.mediumFont),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(
-              width: 160,
-              child: RadioListTile<String?>(
-                title: const Text("Collector"),
-                value: "Collector",
-                groupValue: controller.jobGroupVal,
-                onChanged: (value) {
-                  setState(() {
-                    if (value == "Collector") {
-                      controller.setIsVIP(false);
-                    }
-                    controller.jobGroupVal = value;
-                  });
-                },
-              ),
+  Widget jobCol() {
+    return SizedBox(
+      width: 160,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("What is your profession?", style: AppFonts.mediumFont),
+          SizedBox(
+            width: 160,
+            child: RadioListTile<String?>(
+              title: const Text("Collector"),
+              value: "Collector",
+              groupValue: controller.jobGroupVal,
+              onChanged: (value) {
+                setState(() {
+                  if (value == "Collector") {
+                    controller.setIsVIP(false);
+                  }
+                  controller.jobGroupVal = value;
+                });
+              },
             ),
-            SizedBox(
-              width: 160,
-              child: RadioListTile<String?>(
-                title: const Text("Journalist"),
-                value: "Journalist",
-                groupValue: controller.jobGroupVal,
-                onChanged: (value) {
-                  setState(() {
-                    if (value == "Journalist") {
-                      controller.setIsVIP(true);
-                    }
-                    controller.jobGroupVal = value;
-                  });
-                },
-              ),
+          ),
+          SizedBox(
+            width: 160,
+            child: RadioListTile<String?>(
+              title: const Text("Journalist"),
+              value: "Journalist",
+              groupValue: controller.jobGroupVal,
+              onChanged: (value) {
+                setState(() {
+                  if (value == "Journalist") {
+                    controller.setIsVIP(true);
+                  }
+                  controller.jobGroupVal = value;
+                });
+              },
             ),
-            SizedBox(
-              width: 160,
-              child: RadioListTile<String?>(
-                title: const Text("Curator"),
-                value: "Curator",
-                groupValue: controller.jobGroupVal,
-                onChanged: (value) {
-                  setState(() {
-                    if (value == "Curator") {
-                      controller.setIsVIP(true);
-                    }
-                    controller.jobGroupVal = value;
-                  });
-                },
-              ),
+          ),
+          SizedBox(
+            width: 160,
+            child: RadioListTile<String?>(
+              title: const Text("Curator"),
+              value: "Curator",
+              groupValue: controller.jobGroupVal,
+              onChanged: (value) {
+                setState(() {
+                  if (value == "Curator") {
+                    controller.setIsVIP(true);
+                  }
+                  controller.jobGroupVal = value;
+                });
+              },
             ),
-            SizedBox(
-              width: 160,
-              child: RadioListTile<String?>(
-                title: const Text("Other"),
-                value: "Other",
-                groupValue: controller.jobGroupVal,
-                onChanged: (value) {
-                  setState(() {
-                    if (value == "Other") {
-                      controller.setIsVIP(false);
-                    }
-                    controller.jobGroupVal = value;
-                  });
-                },
-              ),
+          ),
+          SizedBox(
+            width: 160,
+            child: RadioListTile<String?>(
+              title: const Text("Other"),
+              value: "Other",
+              groupValue: controller.jobGroupVal,
+              onChanged: (value) {
+                setState(() {
+                  if (value == "Other") {
+                    controller.setIsVIP(false);
+                  }
+                  controller.jobGroupVal = value;
+                });
+              },
             ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
-  Column artfairCol() {
+  Widget artfairCol() {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text("Do you got to art auctions?", style: AppFonts.mediumFont),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(
-              width: 160,
-              child: RadioListTile<String?>(
-                title: const Text("Yes"),
-                value: "Yes",
-                groupValue: controller.auctionGroupVal,
-                onChanged: (value) {
-                  setState(() {
-                    if (value == "Yes") {
-                      controller.setAuction(true);
-                    }
-                    controller.auctionGroupVal = value;
-                  });
-                },
-              ),
-            ),
-            SizedBox(
-              width: 160,
-              child: RadioListTile<String?>(
-                title: const Text("No"),
-                value: "No",
-                groupValue: controller.auctionGroupVal,
-                onChanged: (value) {
-                  setState(() {
-                    if (value == "No") {
-                      controller.setAuction(false);
-                    }
-                    controller.auctionGroupVal = value;
-                  });
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Column artAuctionCol() {
-    return Column(
-      children: [
-        Text("Do you got to art fairs?", style: AppFonts.mediumFont),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(
-              width: 160,
-              child: RadioListTile<String?>(
-                title: const Text("Yes"),
-                value: "Yes",
-                groupValue: controller.fairGroupVal,
-                onChanged: (value) {
-                  setState(() {
-                    if (value == "Yes") {
-                      controller.setFairs(true);
-                    }
-                    controller.fairGroupVal = value;
-                  });
-                },
-              ),
-            ),
-            SizedBox(
-              width: 160,
-              child: RadioListTile<String?>(
-                title: const Text("No"),
-                value: "No",
-                groupValue: controller.fairGroupVal,
-                onChanged: (value) {
-                  setState(() {
-                    if (value == "No") {
-                      controller.setFairs(false);
-                    }
-                    controller.fairGroupVal = value;
-                  });
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Row saveBtn() {
-    return Row(
-      children: [
         SizedBox(
-            width: ScreenSize.width * 0.3, height: ScreenSize.height * 0.03),
-        Expanded(
-          child: ElevatedButton(
-            onPressed: () {
-              controller.currentUser.city = cityField.text;
-              controller.currentUser.country = countryField.text;
-              controller.userService.updateUser(controller.currentUser);
+          width: 160,
+          child: RadioListTile<String?>(
+            title: const Text("Yes"),
+            value: "Yes",
+            groupValue: controller.auctionGroupVal,
+            onChanged: (value) {
+              setState(() {
+                if (value == "Yes") {
+                  controller.setAuction(true);
+                }
+                controller.auctionGroupVal = value;
+              });
             },
-            child: Text(
-              "Save Preferences".toUpperCase(),
-            ),
           ),
         ),
         SizedBox(
-            width: ScreenSize.width * 0.3, height: ScreenSize.height * 0.03),
+          width: 160,
+          child: RadioListTile<String?>(
+            title: const Text("No"),
+            value: "No",
+            groupValue: controller.auctionGroupVal,
+            onChanged: (value) {
+              setState(() {
+                if (value == "No") {
+                  controller.setAuction(false);
+                }
+                controller.auctionGroupVal = value;
+              });
+            },
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget artAuctionCol() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("Do you got to art fairs?", style: AppFonts.mediumFont),
+        SizedBox(
+          width: 160,
+          child: RadioListTile<String?>(
+            title: const Text("Yes"),
+            value: "Yes",
+            groupValue: controller.fairGroupVal,
+            onChanged: (value) {
+              setState(() {
+                if (value == "Yes") {
+                  controller.setFairs(true);
+                }
+                controller.fairGroupVal = value;
+              });
+            },
+          ),
+        ),
+        SizedBox(
+          width: 160,
+          child: RadioListTile<String?>(
+            title: const Text("No"),
+            value: "No",
+            groupValue: controller.fairGroupVal,
+            onChanged: (value) {
+              setState(() {
+                if (value == "No") {
+                  controller.setFairs(false);
+                }
+                controller.fairGroupVal = value;
+              });
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget saveBtn() {
+    return ElevatedButton(
+      onPressed: () {
+        controller.currentUser.city = cityField.text;
+        controller.currentUser.country = countryField.text;
+        controller.userService.updateUser(controller.currentUser);
+      },
+      child: Text(
+        "Save Preferences".toUpperCase(),
+      ),
     );
   }
 }
@@ -420,7 +493,7 @@ class LocationController extends GetxController {
   late User currentUser;
   List<Artwork>? artworks = [];
   List<Gallery>? galleries = [];
-  List<Artist>? aritsts = [];
+  List<Artist>? artists = [];
   final userService = UserService();
   final artworkService = ArtworkService();
   final galleryService = GalleryService();
@@ -433,7 +506,7 @@ class LocationController extends GetxController {
     users = await userService.getUsers();
     artworks = await artworkService.getArtworks();
     galleries = await galleryService.getGalleries();
-    aritsts = await artistService.getArtists();
+    artists = await artistService.getArtists();
     for (User u in users!) {
       if (u.id == userid) {
         currentUser = u;
@@ -490,8 +563,6 @@ class LocationController extends GetxController {
     if (title == "Sarah Dobai") {
       return 'images/sarah_dobai.png';
     }
-
-
 
     return 'images/no_image.png';
   }

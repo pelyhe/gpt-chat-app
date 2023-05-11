@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:project/general/fonts.dart';
 import 'package:project/general/themes.dart';
-import 'package:project/general/utils.dart';
 
 // ignore: must_be_immutable
 class GeneralCard extends StatefulWidget {
   bool isHovering = false;
+  bool isChosen = false;
   String name;
   String pictureURL;
   Function callback;
@@ -34,6 +34,9 @@ class _GeneralCardState extends State<GeneralCard> {
 
     return InkWell(
       onTap: () {
+        setState(() {
+          widget.isChosen = !widget.isChosen;
+        });
         widget.callback(widget.name);
       },
       onHover: (isHovering) {
@@ -55,11 +58,11 @@ class _GeneralCardState extends State<GeneralCard> {
         duration: const Duration(milliseconds: 200),
         transform: transform,
         child: SizedBox(
-          width: ScreenSize.width * 0.7 > 300 ? 300 : ScreenSize.width * 0.7,
-          height: ScreenSize.width * 0.7 > 500 ? 500 : ScreenSize.width * 0.7,
+          width: ScreenSize.width * 0.9 > 300 ? 300 : ScreenSize.width * 0.9,
+          height: ScreenSize.width * 0.9 > 400 ? 400 : ScreenSize.width * 0.9,
           child: Card(
             elevation: elevation,
-            color: AppColors.kPrimaryLightColor,
+            color: widget.isChosen? Colors.green[400] : AppColors.grey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.center,

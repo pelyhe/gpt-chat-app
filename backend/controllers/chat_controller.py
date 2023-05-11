@@ -1,3 +1,4 @@
+import asyncio
 import csv
 import logging
 from pathlib import Path
@@ -27,61 +28,51 @@ userModel = db['users']
 
 ## THE MODEL WHICH USES GENERAL GPT KNOWLEDGE, BUT DONT ALWAYS RESPONSE WITH THE RIGHT ANSWER
 
-class ChatController(BaseModel):
+class ChatController(object):
+    def __init__(self):
+        self._create_chat_agent()
 
-    def _create_chat_agent(memory):
+    def _create_chat_agent(self):
 
         doc_set = {}
         all_docs = []
 
-        # DocxReader = download_loader("DocxReader")
-        # CSVReader = download_loader("SimpleCSVReader")
-        # loader = DocxReader()
-        # csv_loader = CSVReader()
-        # # loop through files / filenames (file storing api?) in db
-        # for filename in os.listdir(DOCUMENTS_DIRECTORY):
-        #     f = DOCUMENTS_DIRECTORY+'/'+filename
-        #     if f.endswith('docx'):
-        #         document = loader.load_data(file=Path(f))
-        #     else:
-        #         document = csv_loader.load_data(file=Path(f))
-        #     # filename is the key, document itself is the value
-        #     doc_set[filename] = document
-        #     all_docs.extend(document)
+        DocxReader = download_loader("DocxReader")
+        CSVReader = download_loader("SimpleCSVReader")
+        loader = DocxReader()
+        csv_loader = CSVReader()
+        # loop through files / filenames (file storing api?) in db
+        for filename in os.listdir(DOCUMENTS_DIRECTORY):
+            f = DOCUMENTS_DIRECTORY+'/'+filename
+            if f.endswith('docx'):
+                document = loader.load_data(file=Path(f))
+            else:
+                document = csv_loader.load_data(file=Path(f))
+            # filename is the key, document itself is the value
+            doc_set[filename] = document
+            all_docs.extend(document)
 
         # # initialize simple vector indices + global vector index
-        # service_context = ServiceContext.from_defaults(chunk_size_limit=1000)
-        # index_set = {}
-        # for filename in os.listdir(DOCUMENTS_DIRECTORY):
-        #     curr_index = GPTSimpleVectorIndex.from_documents(
-        #         doc_set[filename], service_context=service_context)
-        #     index_set[filename] = curr_index
-        #     curr_index.save_to_disk(f'indices/index_{filename}.json') 
-        
-        # Load indices from disk
+        service_context = ServiceContext.from_defaults(chunk_size_limit=512)
         index_set = {}
         for filename in os.listdir(DOCUMENTS_DIRECTORY):
-            curr_index = GPTSimpleVectorIndex.load_from_disk(f'indices/index_{filename}.json')
+            curr_index = GPTSimpleVectorIndex.from_documents(
+                doc_set[filename], service_context=service_context)
             index_set[filename] = curr_index
 
-        llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-3.5-turbo", max_tokens=1000))
-        # service_context = ServiceContext.from_defaults(
-        #     llm_predictor=llm_predictor)
+        llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-4", max_tokens=1024))
+        service_context = ServiceContext.from_defaults(
+            llm_predictor=llm_predictor)
 
         # define a list index over the vector indices
         # allows us to synthesize information across each index
-        # graph = ComposableGraph.from_indices(
-        #     GPTListIndex,
-        #     [index_set[f] for f in os.listdir(DOCUMENTS_DIRECTORY)],
-        #     index_summaries=[
-        #         "useful for when you need to answer questions about the gallery, artworks, Sara Dobai, Rober Bresson, Glassyard Gallery, exhibition or any information about people related to art." for x in index_set],
-        #     service_context=service_context
-        # )
-
-        # graph.save_to_disk(f'indices/'+ GRAPH_INDEX_FILENAME)
-
-
-        graph = ComposableGraph.load_from_disk(f'indices/'+ GRAPH_INDEX_FILENAME)
+        graph = ComposableGraph.from_indices(
+            GPTListIndex,
+            [index_set[f] for f in os.listdir(DOCUMENTS_DIRECTORY)],
+            index_summaries=[
+                "useful for when you need to answer questions about the gallery, artworks, Sara Dobai, Rober Bresson, Glassyard Gallery, exhibition or any information about people related to art." for x in index_set],
+            service_context=service_context
+        )
 
         decompose_transform = DecomposeQueryTransform(
             llm_predictor, verbose=True
@@ -152,16 +143,16 @@ class ChatController(BaseModel):
             graph_configs=[graph_config]
         )
 
-        llm = OpenAI(temperature=0, model_name="gpt-3.5-turbo")
+        llm = OpenAI(temperature=0, model_name="gpt-4", top_p=0.2, presence_penalty=0.4, frequency_penalty=0.2)
 
-        return create_llama_chat_agent(
+        self.agent = create_llama_chat_agent(
             toolkit,
             llm,
-            memory=memory,
-            verbose=True
+            memory=ConversationBufferMemory(),
+            verbose=False
         )
 
-    def _update_previous_messages(userId: str, prompt: str, response: str):
+    def _update_previous_messages(self, userId: str, prompt: str, response: str):
         new_message = {
             "user": prompt,
             "ai": response,
@@ -171,14 +162,14 @@ class ChatController(BaseModel):
         userModel.update_one({"_id": ObjectId(userId)}, {
                              "$push": {"previousMessages": new_message}})
 
-    def _log_to_file(prompt, responseTime, succeed, errorMessage=None):
+    def _log_to_file(self, prompt, responseTime, succeed, errorMessage=None):
         if succeed:
             logging.critical('RESPONSE TIME: '+ responseTime +'. Question: '+ prompt)
         else:
             logging.critical('ERROR: ' + errorMessage)
 
     # after every 5 questions, update db with user's category
-    def _update_user_category(id: str):
+    def _update_user_category(self, id: str):
         document = userModel.find_one({"_id": id})
         previousMessages = document['previousMessages']
         if len(previousMessages) % 5 == 0 and len(previousMessages) != 0:
@@ -205,9 +196,7 @@ class ChatController(BaseModel):
                 update = { "$set": { "category": "thematic" } }
                 userModel.update_one(filter, update)
 
-
-    @classmethod
-    def askAI(cls, prompt: str, id: str):
+    async def askAI(self, prompt: str, id: str):
         try:
             objId = ObjectId(id)
         except:
@@ -222,28 +211,29 @@ class ChatController(BaseModel):
             with open('conv_memory/'+id+'.pickle', 'rb') as handle:
                 mem = pickle.load(handle)
 
-        cls._update_user_category(id=objId)
-        agent_executor = cls._create_chat_agent(mem)
+        self._update_user_category(id=objId)
+        # agent_executor = cls._create_chat_agent(mem)
+        self.agent.memory = mem
 
-        # beforeResponseTimestamp = datetime.datetime.now()
+        beforeResponseTimestamp = datetime.datetime.now()
         # for could not parse LLM output
         try:
-            response = agent_executor.run(input=prompt)
+            response = await self.agent.arun(input=prompt)
         except ValueError as e:
             response = str(e)
             if not response.startswith("Could not parse LLM output: `"):
-                # cls._log_to_file(prompt, responseTime, succeed=False, errorMessage=str(e))
+                self._log_to_file(prompt, responseTime, succeed=False, errorMessage=str(e))
                 raise e
             response = response.removeprefix(
                 "Could not parse LLM output: `").removesuffix("`")
 
-        # afterResponseTimestamp = datetime.datetime.now()
-        # responseTime = afterResponseTimestamp-beforeResponseTimestamp
-        # cls._log_to_file(prompt, str(responseTime), succeed=True)
+        afterResponseTimestamp = datetime.datetime.now()
+        responseTime = afterResponseTimestamp-beforeResponseTimestamp
+        self._log_to_file(prompt, str(responseTime), succeed=True)
 
         # save memory after response
         with open('conv_memory/' + id + '.pickle', 'wb') as handle:
             pickle.dump(mem, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        cls._update_previous_messages(id, prompt, response)
+        self._update_previous_messages(id, prompt, response)
         return {"answer": response}
