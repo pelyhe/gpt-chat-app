@@ -517,54 +517,54 @@ class LocationController extends GetxController {
 
   setURL(String title) {
     if (title == "Bond Street I") {
-      return 'images/bond_street_I_picture.png';
+      return 'assets/images/bond_street_I_picture.png';
     }
     if (title == "Mile End") {
-      return 'images/mile_end_picture.png';
+      return 'assets/images/mile_end_picture.png';
     }
     if (title == "Brompton Road") {
-      return 'images/brompton_road_picture.png';
+      return 'assets/images/brompton_road_picture.png';
     }
     if (title == "Costumier") {
-      return 'images/costumier.png';
+      return 'assets/images/costumier.png';
     }
     if (title == "Hatton Garden") {
-      return 'images/hatton_garden.png';
+      return 'assets/images/hatton_garden.png';
     }
     if (title == "New Bond St") {
-      return 'images/new_bond_st.png';
+      return 'assets/images/new_bond_st.png';
     }
 
     if (title == "Koller Gallery") {
-      return 'images/koller_gallery.jpg';
+      return 'assets/images/koller_gallery.jpg';
     }
     if (title == "Misa Art") {
-      return 'images/misa_art_gallery.jpg';
+      return 'assets/images/misa_art_gallery.jpg';
     }
     if (title == "The British Museum") {
-      return 'images/british_museum_gallery.jpg';
+      return 'assets/images/british_museum_gallery.jpg';
     }
     if (title == "Glassyard Gallery") {
-      return 'images/glassyard_gallery.png';
+      return 'assets/images/glassyard_gallery.png';
     }
 
     if (title == "Julian Rosefeldt") {
-      return 'images/julian_rosefeldt.png';
+      return 'assets/images/julian_rosefeldt.png';
     }
     if (title == "Paul Herrmann") {
-      return 'images/no_image.png';
+      return 'assets/images/no_image.png';
     }
     if (title == "William Anthony") {
-      return 'images/no_image.png';
+      return 'assets/images/no_image.png';
     }
     if (title == "Jule Waibel") {
-      return 'images/jule_waibel.png';
+      return 'assets/images/jule_waibel.png';
     }
     if (title == "Sarah Dobai") {
-      return 'images/sarah_dobai.png';
+      return 'assets/images/sarah_dobai.png';
     }
 
-    return 'images/no_image.png';
+    return 'assets/images/no_image.png';
   }
 
   void setFavArtwork(String s) {
