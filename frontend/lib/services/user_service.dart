@@ -21,8 +21,13 @@ class UserService {
         final List<User> result = [];
         User user;
         for (var i = 0; i < jsonData.length; i++) {
-          user =
-              User(id: jsonData[i]['_id'], username: jsonData[i]['username']);
+          user = User(
+              id: jsonData[i]['_id'],
+              username: jsonData[i]['username'],
+              country: jsonData[i]['location'],
+              isVIP: jsonData[i]['isVip'],
+              auctions: jsonData[i]['goAuctions'],
+              fairs: jsonData[i]['goArtfairs']);
           result.add(user);
         }
         return result;
@@ -82,5 +87,33 @@ class UserService {
     } catch (error) {
       return null;
     }
+  }
+  
+  // TODO: classify parameters
+  Future<http.Response> updateUser(User u) async {
+    String id = u.id;
+    String location = u.country;
+    String favArtwork = u.favArtwork;
+    String favGallery = u.favGallery;
+    String favArtist = u.favArtist;
+    String auctions = u.auctions.toString();
+    String fairs = u.fairs.toString();
+    String vip = u.isVIP.toString();
+    return http.post(
+      Uri.parse('${dotenv.env['CHAT_API_URL']}/user/update?id=$id&location=$location&favArtwork=$favArtwork&favGallery=$favGallery&favArtist=$favArtist&auctions=$auctions&fairs=$fairs&vip=$vip'), ///ask?prompt=$prompt&id=$id'
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'userName': u.username,
+        'location': u.country,
+        'favArtwork': u.favArtwork,
+        'favGallery': u.favGallery,
+        'favArtist': u.favArtist,
+        'goAuctions': u.auctions.toString(),
+        'goArtfairs': u.fairs.toString(),
+        'isVip': u.isVIP.toString(),
+      }),
+    );
   }
 }

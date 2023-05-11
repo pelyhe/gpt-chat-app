@@ -1,5 +1,6 @@
 {
     "python.analysis.extraPaths": [
         "./backend/controllers"
-    ]
+    ],
+    "cmake.sourceDirectory": "D:/A Collection of Random Programs/ParisFotoDemo/gpt-chat-app/frontend/windows"
 }

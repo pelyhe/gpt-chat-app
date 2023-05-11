@@ -1,7 +1,7 @@
 # import necessary packages
 import os
 from fastapi import APIRouter
-from controllers.chat_v2_controller import ChatController
+from controllers.chat_controller import ChatController
 
 router = APIRouter()
 chat_controller = ChatController()

@@ -95,7 +95,7 @@ class _ChatPageState extends State<ChatPage> {
         alignment: Alignment.bottomLeft,
         child: TypingIndicator(
           showIndicator: controller.isWaitingForAnswer,
-          bubbleColor: Colors.grey[300]!,
+          bubbleColor: AppColors.grey!,
         ),
       ),
       Align(
@@ -162,7 +162,7 @@ class _ChatPageState extends State<ChatPage> {
         Expanded(
           child: ChatBubble(
             clipper: ChatBubbleClipper7(type: BubbleType.receiverBubble),
-            backGroundColor: Colors.grey[300],
+            backGroundColor: AppColors.grey,
             margin: const EdgeInsets.only(top: 20),
             child: Container(
               constraints: BoxConstraints(
@@ -200,7 +200,7 @@ class _ChatPageState extends State<ChatPage> {
               child: TextField(
                   controller: controller._textFieldController,
                   decoration: InputDecoration(
-                    fillColor: Colors.grey[300],
+                    fillColor: AppColors.grey,
                     hintText: "Type your message here...",
                     hintStyle: const TextStyle(color: Colors.black),
                   ),
