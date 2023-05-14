@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project/general/fonts.dart';
 import 'package:project/general/themes.dart';
-import 'package:project/general/utils.dart';
 
 // ignore: must_be_immutable
 class GeneralCard extends StatefulWidget {
