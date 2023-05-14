@@ -77,9 +77,9 @@ class UserService {
       body: jsonEncode(<String, String>{
         'userName': u.username,
         'location': u.country,
-        'favArtwork': u.favArtwork,
-        'favGallery': u.favGallery,
-        'favArtist': u.favArtist,
+        'favArtwork': ' ', //u.favArtwork,
+        'favGallery': ' ', //u.favGallery,
+        'favArtist': ' ',//u.favArtist,
         'goAuctions': u.auctions.toString(),
         'goArtfairs': u.fairs.toString(),
         'isVip': u.isVIP.toString(),
