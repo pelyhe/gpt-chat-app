@@ -230,7 +230,7 @@ class _PreferenceQuizPageState extends State<PreferenceQuizPage> {
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(
+            SizedBox(
               width: 160,
               child: RadioListTile<String?>(
                 title: const Text("Collector"),
@@ -246,7 +246,7 @@ class _PreferenceQuizPageState extends State<PreferenceQuizPage> {
                 },
               ),
             ),
-            Container(
+            SizedBox(
               width: 160,
               child: RadioListTile<String?>(
                 title: const Text("Journalist"),
@@ -262,7 +262,7 @@ class _PreferenceQuizPageState extends State<PreferenceQuizPage> {
                 },
               ),
             ),
-            Container(
+            SizedBox(
               width: 160,
               child: RadioListTile<String?>(
                 title: const Text("Curator"),
@@ -278,7 +278,7 @@ class _PreferenceQuizPageState extends State<PreferenceQuizPage> {
                 },
               ),
             ),
-            Container(
+            SizedBox(
               width: 160,
               child: RadioListTile<String?>(
                 title: const Text("Other"),
@@ -307,7 +307,7 @@ class _PreferenceQuizPageState extends State<PreferenceQuizPage> {
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(
+            SizedBox(
               width: 160,
               child: RadioListTile<String?>(
                 title: const Text("Yes"),
@@ -323,7 +323,7 @@ class _PreferenceQuizPageState extends State<PreferenceQuizPage> {
                 },
               ),
             ),
-            Container(
+            SizedBox(
               width: 160,
               child: RadioListTile<String?>(
                 title: const Text("No"),
@@ -352,7 +352,7 @@ class _PreferenceQuizPageState extends State<PreferenceQuizPage> {
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(
+            SizedBox(
               width: 160,
               child: RadioListTile<String?>(
                 title: const Text("Yes"),
@@ -368,7 +368,7 @@ class _PreferenceQuizPageState extends State<PreferenceQuizPage> {
                 },
               ),
             ),
-            Container(
+            SizedBox(
               width: 160,
               child: RadioListTile<String?>(
                 title: const Text("No"),
