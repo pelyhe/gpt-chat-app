@@ -499,15 +499,27 @@ class LocationController extends GetxController {
   }
 
   void setFavArtwork(String s) {
-    currentUser.favArtwork = s;
+    if(currentUser.favArtwork.contains(s)){
+      currentUser.favArtwork.remove(s);
+    }else{
+      currentUser.favArtwork.add(s);
+    }
   }
 
   void setFavGallery(String s) {
-    currentUser.favGallery = s;
+    if(currentUser.favGallery.contains(s)){
+      currentUser.favGallery.remove(s);
+    }else{
+      currentUser.favGallery.add(s);
+    }
   }
 
   void setFavArtist(String s) {
-    currentUser.favArtist = s;
+    if(currentUser.favArtist.contains(s)){
+      currentUser.favArtist.remove(s);
+    }else{
+      currentUser.favArtist.add(s);
+    }
   }
 
   void setIsVIP(bool s) {
