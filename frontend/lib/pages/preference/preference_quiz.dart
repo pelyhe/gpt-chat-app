@@ -13,21 +13,17 @@ import '../../entities/gallery.dart';
 import '../../entities/user.dart';
 import '../../services/artist_service.dart';
 import '../../services/gallery_service.dart';
-import 'favourite_artist.dart';
-import 'favourite_artworks.dart';
-import 'favourite_galleries.dart';
 import 'general_card.dart';
-import 'job_action_fairs.dart';
 
-class LocationPage extends StatefulWidget {
+class PreferenceQuizPage extends StatefulWidget {
   static String idParameterName = "userid";
-  const LocationPage({Key? key}) : super(key: key);
+  const PreferenceQuizPage({Key? key}) : super(key: key);
 
   @override
-  State<LocationPage> createState() => _LocationPageState();
+  State<PreferenceQuizPage> createState() => _PreferenceQuizPageState();
 }
 
-class _LocationPageState extends State<LocationPage> {
+class _PreferenceQuizPageState extends State<PreferenceQuizPage> {
   final controller = LocationController();
   TextEditingController countryField = TextEditingController();
   TextEditingController cityField = TextEditingController();
@@ -36,7 +32,7 @@ class _LocationPageState extends State<LocationPage> {
   @override
   void initState() {
     super.initState();
-    controller.userid = Get.parameters[LocationPage.idParameterName]!;
+    controller.userid = Get.parameters[PreferenceQuizPage.idParameterName]!;
     load = controller.load();
   }
 
@@ -127,7 +123,7 @@ class _LocationPageState extends State<LocationPage> {
                   Expanded(
                     child: TextField(
                       controller: countryField,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         hintText: 'Country',
                       ),
@@ -136,7 +132,7 @@ class _LocationPageState extends State<LocationPage> {
                   Expanded(
                     child: TextField(
                       controller: cityField,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         hintText: 'City',
                       ),
@@ -402,9 +398,9 @@ class _LocationPageState extends State<LocationPage> {
         Expanded(
           child: ElevatedButton(
             onPressed: () {
-              controller.currentUser!.city = cityField.text;
-              controller.currentUser!.country = countryField.text;
-              controller.userService.updateUser(controller.currentUser!);
+              controller.currentUser.city = cityField.text;
+              controller.currentUser.country = countryField.text;
+              controller.userService.updateUser(controller.currentUser);
               //print(controller.currentUser);
               //Navigator.pushNamed(context, '/purchasedArtwork');
             },
@@ -445,7 +441,6 @@ class LocationController extends GetxController {
         currentUser = u;
       }
     }
-    print(currentUser.username);
     update();
   }
 
@@ -505,31 +500,25 @@ class LocationController extends GetxController {
 
   void setFavArtwork(String s) {
     currentUser.favArtwork = s;
-    print(currentUser.favArtwork);
   }
 
   void setFavGallery(String s) {
     currentUser.favGallery = s;
-    print(currentUser.favGallery);
   }
 
   void setFavArtist(String s) {
     currentUser.favArtist = s;
-    print(currentUser.favArtist);
   }
 
   void setIsVIP(bool s) {
     currentUser.isVIP = s;
-    print("IsVIP: " + currentUser.isVIP.toString());
   }
 
   void setAuction(bool b) {
     currentUser.auctions = b;
-    print("Auctions: " + currentUser.auctions.toString());
   }
 
   void setFairs(bool b) {
     currentUser.fairs = b;
-    print("Fairs: " + currentUser.fairs.toString());
   }
 }

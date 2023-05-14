@@ -18,6 +18,5 @@ class User {
     required this.isVIP,
     required this.auctions,
     required this.fairs
-    //favokat beírni
   });
 }
