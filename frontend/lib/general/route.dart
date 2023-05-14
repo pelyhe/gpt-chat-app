@@ -3,7 +3,7 @@ import 'package:project/pages/auth/login_screen.dart';
 import 'package:project/pages/auth/sign_up_screen.dart';
 import 'package:project/pages/chat/chat.dart';
 import 'package:project/pages/home.dart';
-import 'package:project/pages/preference/preference_quiz.dart';
+import 'package:project/pages/preference_quiz.dart';
 
 
 class AppRoutes {
