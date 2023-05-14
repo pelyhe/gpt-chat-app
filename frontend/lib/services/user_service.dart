@@ -69,16 +69,8 @@ class UserService {
   }
 
   Future<http.Response> updateUser(User u) async {
-    String id = u.id;
-    String location = u.country;
-    String favArtwork = u.favArtwork;
-    String favGallery = u.favGallery;
-    String favArtist = u.favArtist;
-    String auctions = u.auctions.toString();
-    String fairs = u.fairs.toString();
-    String vip = u.isVIP.toString();
     return http.post(
-      Uri.parse('${dotenv.env['CHAT_API_URL']}/user/update?id=$id&location=$location&favArtwork=$favArtwork&favGallery=$favGallery&favArtist=$favArtist&auctions=$auctions&fairs=$fairs&vip=$vip'), ///ask?prompt=$prompt&id=$id'
+      Uri.parse('${dotenv.env['CHAT_API_URL']}/user/update'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

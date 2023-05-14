@@ -91,7 +91,6 @@ class _UserCardState extends State<UserCard> {
                 ElevatedButton(
                   onPressed: () {
                     Get.toNamed('/location/${widget.user.id}');
-                    //Navigator.pushNamed(context, '/location');
                   },
                   child: Text("Take Preference Quiz".toUpperCase()),
                 ),

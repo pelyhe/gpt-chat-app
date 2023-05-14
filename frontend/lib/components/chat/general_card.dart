@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:project/general/fonts.dart';
 import 'package:project/general/themes.dart';
 
@@ -25,6 +26,8 @@ class GeneralCard extends StatefulWidget {
 }
 
 class _GeneralCardState extends State<GeneralCard> {
+  final controller = GeneralCardController();
+
   @override
   Widget build(BuildContext context) {
     final transform =
@@ -34,8 +37,9 @@ class _GeneralCardState extends State<GeneralCard> {
     return InkWell(
       onTap: () {
         widget.callback(widget.name);
-        //TODO color change
-        //Navigator.pushNamed(context, '/chat?id=${widget.user.id}');
+        setState(() {
+          controller.changeColor();
+        });
       },
       onHover: (isHovering) {
         if (isHovering) {
@@ -60,7 +64,7 @@ class _GeneralCardState extends State<GeneralCard> {
           height: ScreenSize.width * 0.7 > 500 ? 500 : ScreenSize.width * 0.7,
           child: Card(
             elevation: elevation,
-            color: AppColors.kPrimaryLightColor,
+            color: controller.currentColor,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -95,5 +99,19 @@ class _GeneralCardState extends State<GeneralCard> {
         ),
       ),
     );
+  }
+}
+
+class GeneralCardController extends GetxController {
+  Color currentColor = AppColors.kPrimaryLightColor;
+  Color unselectedColor = AppColors.kPrimaryLightColor;
+  Color selectedColor = AppColors.kPrimaryColor;
+
+  changeColor() {
+    if (currentColor == unselectedColor) {
+      currentColor = selectedColor;
+    } else if (currentColor == selectedColor) {
+      currentColor = unselectedColor;
+    }
   }
 }
