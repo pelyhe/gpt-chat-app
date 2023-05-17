@@ -6,6 +6,7 @@ import 'package:project/entities/user.dart';
 import 'package:http/http.dart' as http;
 
 class UserService {
+  //TODO refactor, data template changed
   Future<List<User>?> getUsers() async {
     try {
       final response = await http.get(
@@ -69,21 +70,23 @@ class UserService {
   }
 
   Future<http.Response> updateUser(User u) async {
+    Map<String, dynamic> data = {
+        'id': u.id,
+        'username': u.username,
+        'location': u.country,
+        'favArtwork': u.favArtwork.toList(),
+        'favGallery': u.favGallery.toList(),
+        'favArtist': u.favArtist.toList(),
+        'goAuctions': u.auctions,
+        'goArtfairs': u.fairs,
+        'isVip': u.isVIP,
+    };
     return http.post(
       Uri.parse('${dotenv.env['CHAT_API_URL']}/user/update'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode(<String, String>{
-        'userName': u.username,
-        'location': u.country,
-        'favArtwork': ' ', //u.favArtwork,
-        'favGallery': ' ', //u.favGallery,
-        'favArtist': ' ',//u.favArtist,
-        'goAuctions': u.auctions.toString(),
-        'goArtfairs': u.fairs.toString(),
-        'isVip': u.isVIP.toString(),
-      }),
+      body: json.encode(data)
     );
   }
 }

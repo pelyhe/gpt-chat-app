@@ -1,9 +1,22 @@
+from typing import Set
 from bson import ObjectId
 from fastapi import HTTPException, Request, Body
 from pydantic import BaseModel
+from models.user import User
 from config.db import get_db
 db = get_db()
 userModel = db['users']
+
+class UserUpdateRequest(BaseModel):
+    id: str
+    username: str
+    location: str
+    favArtwork: Set[str]
+    favGallery: Set[str]
+    favArtist: Set[str]
+    goAuctions: bool
+    goArtfairs: bool
+    isVip: bool
 
 class UserController(BaseModel):
     
@@ -36,19 +49,14 @@ class UserController(BaseModel):
         else:
             raise HTTPException(status_code=400, detail="Not a valid user or previous messages no previous messages array.")
         
-    def update_user(id: str, location: str, favArtwork: str, favGallery: str, favArtist: str, auctions: str, fairs: str, vip: str):
-        auc = False
-        fair = False
-        isVip = False
-        if(auctions == 'true'):
-            auc = True
-        if(fairs == 'true'):
-            fair = True
-        if(vip == 'true'):
-            isVip = True
-        #Todo update so only not empty strings are uploaded
-        userModel.update_one({"_id": ObjectId(id)}, {
-                                "$push": {"favouriteArtists": favArtist, "favouriteGalleries": favGallery,"favouriteArtworks": favArtwork}, #---
-                                "$set" : {"isVip": isVip,"location": location,"goAuctions": fair,"goArtfairs": auc}, #---
-                             }
-                            )
+    def update_user(u: User):
+        filter = {"_id": ObjectId(u.id)}
+        update = { "$set": {
+            'location': u.location,
+            'favouriteArtworks': u.favArtwork,
+            'favouriteGalleries': u.favGallery,
+            'favouriteArtists': u.favArtist,
+            'goAuctions': u.goAuctions,
+            'goArtfairs': u.goArtfairs,
+            'isVip': u.isVip, } }
+        userModel.update_one(filter, update)

@@ -1,10 +1,12 @@
-from pydantic import BaseModel, SecretStr
-from typing import Optional
-from uuid import UUID, uuid4
-from passlib.context import CryptContext
-
-pwd_context = CryptContext(schemes=["bcrypt"])
+from pydantic import BaseModel
 
 class User(BaseModel):
-    id: Optional[UUID] = uuid4
+    id: str
     username: str
+    location: str
+    favArtwork: list[str]
+    favGallery: list[str]
+    favArtist: list[str]
+    goAuctions: bool
+    goArtfairs: bool
+    isVip: bool

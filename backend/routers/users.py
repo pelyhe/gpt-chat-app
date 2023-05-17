@@ -1,9 +1,14 @@
 from bson import ObjectId
 from fastapi import APIRouter, Request
-
+from pydantic import BaseModel
+from typing import List
+from models.user import User
 from controllers.user_controller import UserController
+
 router = APIRouter()
 
+
+    
 # get all users
 @router.get("/user", tags=["user"])
 def get_users():
@@ -24,5 +29,5 @@ def get_previous_messages_by_user_id(id):
     return UserController.get_previous_messages_by_user_id(id)
 
 @router.post("/user/update")
-def update_user(id: str, location: str, favArtwork: str, favGallery: str, favArtist: str, auctions: str, fairs: str, vip: str):
-    return UserController.update_user(id=id, location = location, favArtwork=favArtwork, favGallery=favGallery, favArtist=favArtist, auctions=auctions, fairs=fairs, vip=vip)
+async def update_user(user: User):
+    return UserController.update_user(user)
