@@ -401,8 +401,6 @@ class _PreferenceQuizPageState extends State<PreferenceQuizPage> {
               controller.currentUser.city = cityField.text;
               controller.currentUser.country = countryField.text;
               controller.userService.updateUser(controller.currentUser);
-              //print(controller.currentUser);
-              //Navigator.pushNamed(context, '/purchasedArtwork');
             },
             child: Text(
               "Save Preferences".toUpperCase(),
@@ -418,8 +416,8 @@ class _PreferenceQuizPageState extends State<PreferenceQuizPage> {
 
 class LocationController extends GetxController {
   late String userid;
-  List<User>? users = [];
   late User currentUser;
+  //List<User>? users = [];
   List<Artwork>? artworks = [];
   List<Gallery>? galleries = [];
   List<Artist>? aritsts = [];
@@ -432,15 +430,10 @@ class LocationController extends GetxController {
   String? fairGroupVal = "No";
 
   load() async {
-    users = await userService.getUsers();
+    currentUser = (await userService.getUsersById(userid))!; 
     artworks = await artworkService.getArtworks();
     galleries = await galleryService.getGalleries();
     aritsts = await artistService.getArtists();
-    for (User u in users!) {
-      if (u.id == userid) {
-        currentUser = u;
-      }
-    }
     update();
   }
 

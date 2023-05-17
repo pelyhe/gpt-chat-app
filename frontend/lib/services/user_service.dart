@@ -37,6 +37,31 @@ class UserService {
     }
   }
 
+  Future<User?> getUsersById(String id) async {
+    try {
+      final response = await http.get(
+          Uri.parse('${dotenv.env['CHAT_API_URL']}/user/id/$id'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          });
+      if (response.statusCode != 200) {
+        return null;
+      } else {
+          final Map<String, dynamic> jsonData = jsonDecode(response.body.toString()) as Map<String, dynamic>;
+          User user = User(
+              id: jsonData['_id'],
+              username: jsonData['username'],
+              country: jsonData['location'],
+              isVIP: jsonData['isVip'],
+              auctions: jsonData['goAuctions'],
+              fairs: jsonData['goArtfairs']);
+          return user;
+      }
+    } catch (error) {
+      return null;
+    }
+  }
+
   Future<List<Message>?> getPreviousMessagesByUserId(String id) async {
     try {
       final response = await http.get(
@@ -71,22 +96,20 @@ class UserService {
 
   Future<http.Response> updateUser(User u) async {
     Map<String, dynamic> data = {
-        'id': u.id,
-        'username': u.username,
-        'location': u.country,
-        'favArtwork': u.favArtwork.toList(),
-        'favGallery': u.favGallery.toList(),
-        'favArtist': u.favArtist.toList(),
-        'goAuctions': u.auctions,
-        'goArtfairs': u.fairs,
-        'isVip': u.isVIP,
+      'id': u.id,
+      'username': u.username,
+      'location': u.country,
+      'favArtwork': u.favArtwork.toList(),
+      'favGallery': u.favGallery.toList(),
+      'favArtist': u.favArtist.toList(),
+      'goAuctions': u.auctions,
+      'goArtfairs': u.fairs,
+      'isVip': u.isVIP,
     };
-    return http.post(
-      Uri.parse('${dotenv.env['CHAT_API_URL']}/user/update'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: json.encode(data)
-    );
+    return http.post(Uri.parse('${dotenv.env['CHAT_API_URL']}/user/update'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: json.encode(data));
   }
 }
