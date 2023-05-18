@@ -11,7 +11,6 @@ import pickle
 from bson import ObjectId
 from fastapi import HTTPException
 from langchain import OpenAI
-from langchain.callbacks import AsyncIteratorCallbackHandler
 from langchain.memory import ConversationBufferMemory
 from llama_index import LLMPredictor, ServiceContext, download_loader, GPTVectorStoreIndex
 from llama_index.langchain_helpers.agents import LlamaToolkit, create_llama_chat_agent, IndexToolConfig
@@ -28,7 +27,7 @@ userModel = db['users']
 class ChatController(object):
     def __init__(self):
         self._create_chat_agent()
-        self.callback_handler = AsyncIteratorCallbackHandler()
+        # self.callback_handler = AsyncIteratorCallbackHandler()
 
     def _create_chat_agent(self):
 
@@ -111,9 +110,9 @@ class ChatController(object):
         userModel.update_one({"_id": ObjectId(userId)}, {
                              "$push": {"previousMessages": new_message}})
 
-    def _log_to_file(self, prompt, responseTime, succeed, errorMessage=None):
+    def _log_to_file(self, prompt, response, responseTime, succeed, errorMessage=None):
         if succeed:
-            logging.critical('RESPONSE TIME: '+ responseTime +'. Question: '+ prompt)
+            logging.critical('RESPONSE TIME: '+ responseTime +'. Question: '+ prompt + ' Answer: ' + response)
         else:
             logging.critical('ERROR: ' + errorMessage)
 
@@ -199,7 +198,7 @@ class ChatController(object):
 
         afterResponseTimestamp = datetime.datetime.now()
         responseTime = afterResponseTimestamp-beforeResponseTimestamp
-        self._log_to_file(prompt, str(responseTime), succeed=True)
+        self._log_to_file(prompt, response, str(responseTime), succeed=True)
 
         # save memory after response
         with open('conv_memory/' + id + '.pickle', 'wb') as handle:
