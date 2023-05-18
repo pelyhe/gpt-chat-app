@@ -47,6 +47,12 @@ class _LocationPageState extends State<LocationPage> {
                 init: controller,
                 builder: (controller) {
                   return Scaffold(
+                    appBar: AppBar(
+                      automaticallyImplyLeading: true,
+                      title: const Text(
+                          "Hello Chat GPT (Beta) powered by Walter's Cube"),
+                      backgroundColor: AppColors.appBarColor.withOpacity(0.9),
+                    ),
                     body: scaffoldBody(
                       context: context,
                       mobileBody: _mobileBody(),
@@ -73,7 +79,7 @@ class _LocationPageState extends State<LocationPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: Center(
                   child: Text(
-                      "Can we use your location to help with better recommendations?",
+                      "Can we use your location for better recommendations?",
                       style: AppFonts.headerFont),
                 ),
               ),

@@ -39,6 +39,12 @@ class _HomePageState extends State<HomePage> {
                 init: controller,
                 builder: (controller) {
                   return Scaffold(
+                    appBar: AppBar(
+                      automaticallyImplyLeading: true,
+                      title: const Text(
+                          "Hello Chat GPT (Beta) powered by Walter's Cube"),
+                      backgroundColor: AppColors.appBarColor.withOpacity(0.9),
+                    ),
                     body: scaffoldBody(
                       context: context,
                       mobileBody: _mobileBody(),
