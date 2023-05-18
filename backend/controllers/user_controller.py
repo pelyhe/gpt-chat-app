@@ -1,18 +1,18 @@
+from config.db import get_db
+from pydantic import BaseModel
+from llama_index import GPTVectorStoreIndex, LLMPredictor, download_loader, ServiceContext
+from langchain import OpenAI
+from fastapi import HTTPException
+from bson import ObjectId
+import json
+import os
 import logging
 
 from pathlib import Path
 LOG_FILE_PATH = 'config/log.log'
 logging.basicConfig(filename=LOG_FILE_PATH, filemode='a', level=logging.CRITICAL,
                     format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
-import os
-import json
-from bson import ObjectId
-from fastapi import HTTPException
-from langchain import OpenAI
-from llama_index import GPTSimpleVectorIndex, LLMPredictor, download_loader, ServiceContext
-from pydantic import BaseModel
 USER_CATEGORY_DIRECTORY = 'data/user_categorize.docx'
-from config.db import get_db
 db = get_db()
 userModel = db['users']
 artworkModel = db['artworks']
@@ -20,7 +20,6 @@ artistModel = db['artists']
 galleryModel = db['gallery']
 os.environ['OPENAI_API_KEY'] = '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'
 
-#
 
 class UserController(BaseModel):
 
@@ -55,28 +54,26 @@ class UserController(BaseModel):
                 status_code=400, detail="Not a valid user or previous messages no previous messages array.")
 
     # TODO: update str to lists of objectIds
-    # TODO: use this: auc = auctions == 'true' 
+    # TODO: use this: auc = auctions == 'true'
     def update_user(id: str, location: str, favArtwork: str, favGallery: str, favArtist: str, auctions: str, fairs: str, vip: str):
         auc = False
         fair = False
         isVip = False
-        if(auctions == 'true'):
+        if (auctions == 'true'):
             auc = True
-        if(fairs == 'true'):
+        if (fairs == 'true'):
             fair = True
-        if(vip == 'true'):
+        if (vip == 'true'):
             isVip = True
         userModel.update_one({"_id": ObjectId(id)}, {
-                                "$push": {"favouriteArtists": favArtist, "favouriteGalleries": favGallery,"favouriteArtworks": favArtwork}, #---
-                                "$set" : {"isVip": isVip,"location": location,"goAuctions": fair,"goArtfairs": auc}, #---
-                             }
-                            )
+            "$push": {"favouriteArtists": favArtist, "favouriteGalleries": favGallery, "favouriteArtworks": favArtwork},
+            "$set": {"isVip": isVip, "location": location, "goAuctions": fair, "goArtfairs": auc},
+        })
 
     @classmethod
     def categorize_user_by_id(cls, previousPrompts: str):
 
         response = cls._get_category_by_ai(previousPrompts)
-        #cls._log_category_by_ai(categorize_query, response.response)
         return response
 
     ### helper functions start here ###
@@ -102,15 +99,16 @@ class UserController(BaseModel):
         DocxReader = download_loader("DocxReader")
         loader = DocxReader()
         f = USER_CATEGORY_DIRECTORY
-        document = loader.load_data(file=Path(f)) 
-        index = GPTSimpleVectorIndex.from_documents(
+        document = loader.load_data(file=Path(f))
+        index = GPTVectorStoreIndex.from_documents(
             document, service_context=service_context)
-        
-        #jsonObject = query.toJSON()
-        #print(jsonObject)
-        return index.query("Please categorize this user by its previous questions. The response should only include one or two word, the category of the user, according to the context, starting with small letter. Each question is seperated with a '|'. The user's previous questions starts here: " + prompt )
 
-    def _log_category_by_ai(query: CategorizeQuery,response: str):
+        # jsonObject = query.toJSON()
+        # print(jsonObject)
+        query_engine = index.as_query_engine()
+        return query_engine.query("Please categorize this user by its previous questions. The response should only include one or two word, the category of the user, according to the context, starting with small letter. Each question is seperated with a '|'. The user's previous questions starts here: " + prompt)
+
+    def _log_category_by_ai(query: CategorizeQuery, response: str):
         userCategory = ""
         if query.goAuctions or not query.hasFavouriteArtists:
             userCategory = "investor"
@@ -121,8 +119,8 @@ class UserController(BaseModel):
                 userCategory = "thematic"
 
         if userCategory == response:
-            logging.critical('MATCHING! AI: ' + response + ' | CALCULATED: ' + userCategory)
+            logging.critical('MATCHING! AI: ' + response +
+                             ' | CALCULATED: ' + userCategory)
         else:
-            logging.critical('DIFFERENT! AI: ' + response + ' | CALCULATED: ' + userCategory)
-        
-
+            logging.critical('DIFFERENT! AI: ' + response +
+                             ' | CALCULATED: ' + userCategory)

@@ -1,6 +1,6 @@
 # import necessary packages
-import os
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 from controllers.chat_controller import ChatController
 
 router = APIRouter()
