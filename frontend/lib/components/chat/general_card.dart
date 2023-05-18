@@ -7,6 +7,7 @@ import 'package:project/general/themes.dart';
 class GeneralCard extends StatefulWidget {
   bool isHovering = false;
   String name;
+  String id;
   String pictureURL;
   Function callback;
 
@@ -17,6 +18,7 @@ class GeneralCard extends StatefulWidget {
   GeneralCard(
       {Key? key,
       required this.name,
+      required this.id,
       required this.callback,
       required this.pictureURL})
       : super(key: key);
@@ -36,7 +38,7 @@ class _GeneralCardState extends State<GeneralCard> {
 
     return InkWell(
       onTap: () {
-        widget.callback(widget.name);
+        widget.callback(widget.id);
         setState(() {
           controller.changeColor();
         });

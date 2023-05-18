@@ -153,6 +153,7 @@ class _PreferenceQuizPageState extends State<PreferenceQuizPage> {
                     Expanded(
                       child: GeneralCard(
                         name: a.title,
+                        id: a.id,
                         callback: controller.setFavArtwork,
                         pictureURL: controller.setURL(a.title),
                       ),
@@ -172,6 +173,7 @@ class _PreferenceQuizPageState extends State<PreferenceQuizPage> {
                     Expanded(
                       child: GeneralCard(
                         name: g.name,
+                        id: g.id,
                         callback: controller.setFavGallery,
                         pictureURL: controller.setURL(g.name),
                       ),
@@ -191,6 +193,7 @@ class _PreferenceQuizPageState extends State<PreferenceQuizPage> {
                     Expanded(
                       child: GeneralCard(
                         name: a.name,
+                        id: a.id,
                         callback: controller.setFavArtist,
                         pictureURL: controller.setURL(a.name),
                       ),
